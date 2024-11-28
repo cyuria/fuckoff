@@ -1,5 +1,7 @@
 import re
+
 from decorator import decorator
+
 from ..utils import is_app
 from ..shells import shell
 
@@ -15,8 +17,12 @@ def git_support(fn, command):
 
     # perform git aliases expansion
     if command.output and 'trace: alias expansion:' in command.output:
-        search = re.search("trace: alias expansion: ([^ ]*) => ([^\n]*)",
-                           command.output)
+        search = re.search(
+            "trace: alias expansion: ([^ ]*) => ([^\n]*)",
+            command.output
+        )
+        if not search:
+            return False
         alias = search.group(1)
 
         # by default git quotes everything, for example:

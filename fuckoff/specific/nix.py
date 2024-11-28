@@ -1,3 +1,3 @@
-from thefuck.utils import which
+from shutil import which
 
 nix_available = bool(which('nix'))

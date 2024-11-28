@@ -1,6 +1,9 @@
 import re
+
+from shutil import which
 from subprocess import Popen, PIPE
-from thefuck.utils import memoize, eager, which
+
+from ..utils import memoize, eager
 
 npm_available = bool(which('npm'))
 
@@ -9,13 +12,22 @@ npm_available = bool(which('npm'))
 @eager
 def get_scripts():
     """Get custom npm scripts."""
-    proc = Popen(['npm', 'run-script'], stdout=PIPE)
-    should_yeild = False
-    for line in proc.stdout.readlines():
-        line = line.decode()
-        if 'available via `npm run-script`:' in line:
-            should_yeild = True
-            continue
+    proc = Popen(['npm', 'run-script'], stdout=PIPE, text=True)
+    proc.wait()
+    if proc.stdout is None:
+        return
 
-        if should_yeild and re.match(r'^  [^ ]+', line):
-            yield line.strip().split(' ')[0]
+    lines = iter(proc.stdout.readlines())
+    try:
+        next(
+            None for line in lines
+            if 'available via `npm run-script`:' in line
+        )
+    except StopIteration:
+        return
+
+    yield from (
+        line.strip().split(' ')[0]
+        for line in lines
+        if re.match('^  [^ ]+', line)
+    )

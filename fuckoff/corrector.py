@@ -1,61 +1,54 @@
+from __future__ import annotations
+
 import sys
-from .conf import settings
-from .types import Rule
-from .system import Path
+
+from pathlib import Path
+from typing import Generator, Iterable, Iterator
+
 from . import logs
+from .conf import settings
+from .types import Command, Rule, CorrectedCommand
 
 
-def get_loaded_rules(rules_paths):
-    """Yields all available rules.
-
-    :type rules_paths: [Path]
-    :rtype: Iterable[Rule]
-
-    """
-    for path in rules_paths:
-        if path.name != '__init__.py':
-            rule = Rule.from_path(path)
-            if rule and rule.is_enabled:
-                yield rule
-
-
-def get_rules_import_paths():
-    """Yields all rules import paths.
-
-    :rtype: Iterable[Path]
-
-    """
+def get_rules_import_paths() -> Generator[Path]:
+    """Yields all rules import paths."""
     # Bundled rules:
     yield Path(__file__).parent.joinpath('rules')
     # Rules defined by user:
     yield settings.user_dir.joinpath('rules')
     # Packages with third-party rules:
     for path in sys.path:
-        for contrib_module in Path(path).glob('thefuck_contrib_*'):
+        for contrib_module in Path(path).glob('fuckoff_contrib_*'):
             contrib_rules = contrib_module.joinpath('rules')
-            if contrib_rules.is_dir():
-                yield contrib_rules
+            if not contrib_rules.is_dir():
+                continue
+            yield contrib_rules
 
 
-def get_rules():
-    """Returns all enabled rules.
+def get_loaded_rules(rules_paths: Iterable[Path]) -> Iterable[Rule]:
+    """Yields all available rules."""
 
-    :rtype: [Rule]
+    return (
+        rule for rule in (
+            Rule.from_path(path) for path in rules_paths
+            if path.name != '__init__.py'
+        ) if rule and rule.is_enabled
+    )
 
-    """
-    paths = [rule_path for path in get_rules_import_paths()
-             for rule_path in sorted(path.glob('*.py'))]
-    return sorted(get_loaded_rules(paths),
-                  key=lambda rule: rule.priority)
+
+def get_rules() -> list[Rule]:
+    """Returns all enabled rules."""
+    return sorted(get_loaded_rules(
+        rule_path
+        for path in get_rules_import_paths()
+        for rule_path in sorted(path.glob('*.py'))
+    ), key=lambda rule: rule.priority)
 
 
-def organize_commands(corrected_commands):
-    """Yields sorted commands without duplicates.
-
-    :type corrected_commands: Iterable[thefuck.types.CorrectedCommand]
-    :rtype: Iterable[thefuck.types.CorrectedCommand]
-
-    """
+def organize_commands(
+        corrected_commands: Iterator[CorrectedCommand]
+) -> Generator[CorrectedCommand]:
+    """Yields sorted commands without duplicates."""
     try:
         first_command = next(corrected_commands)
         yield first_command
@@ -64,12 +57,15 @@ def organize_commands(corrected_commands):
 
     without_duplicates = {
         command for command in sorted(
-            corrected_commands, key=lambda command: command.priority)
-        if command != first_command}
+            corrected_commands,
+            key=lambda command: command.priority
+        ) if command != first_command
+    }
 
     sorted_commands = sorted(
         without_duplicates,
-        key=lambda corrected_command: corrected_command.priority)
+        key=lambda corrected_command: corrected_command.priority
+    )
 
     logs.debug(u'Corrected commands: {}'.format(
         ', '.join(u'{}'.format(cmd) for cmd in [first_command] + sorted_commands)))
@@ -78,15 +74,10 @@ def organize_commands(corrected_commands):
         yield command
 
 
-def get_corrected_commands(command):
-    """Returns generator with sorted and unique corrected commands.
-
-    :type command: thefuck.types.Command
-    :rtype: Iterable[thefuck.types.CorrectedCommand]
-
-    """
-    corrected_commands = (
+def get_corrected_commands(command: Command) -> Generator[CorrectedCommand]:
+    """Returns generator with sorted and unique corrected commands."""
+    return organize_commands(
         corrected for rule in get_rules()
         if rule.is_match(command)
-        for corrected in rule.get_corrected_commands(command))
-    return organize_commands(corrected_commands)
+        for corrected in rule.get_corrected_commands(command)
+    )

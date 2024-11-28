@@ -1,6 +1,5 @@
 import array
 import fcntl
-from functools import partial
 import mmap
 import os
 import pty
@@ -8,7 +7,11 @@ import signal
 import sys
 import termios
 import tty
-from .. import logs, const
+
+from functools import partial
+
+from .. import const
+from .. import logs
 
 
 def _read(f, fd):

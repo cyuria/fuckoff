@@ -1,17 +1,31 @@
+from collections.abc import Iterable
+import os
 import sys
 from argparse import ArgumentParser, SUPPRESS
+from dataclasses import dataclass
 from .const import ARGUMENT_PLACEHOLDER
-from .utils import get_alias
+
+
+@dataclass
+class Arguments:
+    version: bool
+    alias: str
+    shell_logger: str
+    enable_experimental_instant_mode: bool
+    help: bool
+    yes: bool
+    repeat: bool
+    debug: bool
+    force_command: str
+    command: list[str]
 
 
 class Parser(object):
     """Argument parser that can handle arguments with our special
-    placeholder.
-
-    """
+    placeholder."""
 
     def __init__(self):
-        self._parser = ArgumentParser(prog='thefuck', add_help=False)
+        self._parser = ArgumentParser(prog='fuckoff', add_help=False)
         self._add_arguments()
 
     def _add_arguments(self):
@@ -23,7 +37,7 @@ class Parser(object):
         self._parser.add_argument(
             '-a', '--alias',
             nargs='?',
-            const=get_alias(),
+            const=os.environ.get('FUCKOFF_ALIAS', 'fuck'),
             help='[custom-alias-name] prints alias for current shell')
         self._parser.add_argument(
             '-l', '--shell-logger',
@@ -37,7 +51,18 @@ class Parser(object):
             '-h', '--help',
             action='store_true',
             help='show this help message and exit')
-        self._add_conflicting_arguments()
+
+        """It's too dangerous to use `-y` and `-r` together."""
+        group = self._parser.add_mutually_exclusive_group()
+        group.add_argument(
+            '-y', '--yes', '--yeah', '--hard',
+            action='store_true',
+            help='execute fixed command without confirmation')
+        group.add_argument(
+            '-r', '--repeat',
+            action='store_true',
+            help='repeat on failure')
+
         self._parser.add_argument(
             '-d', '--debug',
             action='store_true',
@@ -51,19 +76,7 @@ class Parser(object):
             nargs='*',
             help='command that should be fixed')
 
-    def _add_conflicting_arguments(self):
-        """It's too dangerous to use `-y` and `-r` together."""
-        group = self._parser.add_mutually_exclusive_group()
-        group.add_argument(
-            '-y', '--yes', '--yeah', '--hard',
-            action='store_true',
-            help='execute fixed command without confirmation')
-        group.add_argument(
-            '-r', '--repeat',
-            action='store_true',
-            help='repeat on failure')
-
-    def _prepare_arguments(self, argv):
+    def _prepare_arguments(self, argv: list[str]) -> list[str]:
         """Prepares arguments by:
 
         - removing placeholder and moving arguments after it to beginning,
@@ -76,14 +89,15 @@ class Parser(object):
         if ARGUMENT_PLACEHOLDER in argv:
             index = argv.index(ARGUMENT_PLACEHOLDER)
             return argv[index + 1:] + ['--'] + argv[:index]
-        elif argv and not argv[0].startswith('-') and argv[0] != '--':
-            return ['--'] + argv
-        else:
+        elif not argv or argv[0].startswith('-'):
             return argv
+        else:
+            return ['--'] + argv
 
-    def parse(self, argv):
+    def parse(self, argv: list[str]) -> Arguments:
         arguments = self._prepare_arguments(argv[1:])
-        return self._parser.parse_args(arguments)
+        parsed = self._parser.parse_args(arguments)
+        return Arguments(**vars(parsed))
 
     def print_usage(self):
         self._parser.print_usage(sys.stderr)

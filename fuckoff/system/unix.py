@@ -1,15 +1,16 @@
-import os
-import sys
-import tty
-import termios
 import colorama
-from distutils.spawn import find_executable
+import sys
+import termios
+import tty
+
+from shutil import which
+
 from .. import const
 
 init_output = colorama.init
 
 
-def getch():
+def getch() -> str:
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
     try:
@@ -19,39 +20,25 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 
-def get_key():
-    ch = getch()
+def get_key() -> str:
+    match getch():
+        case _ as ch if ch in const.KEY_MAPPING:
+            return const.KEY_MAPPING[ch]
+        case '\x1b':
+            if getch() != '[':
+                return '\x1b'
+            match getch():
+                case 'A':
+                    return const.KEY_UP
+                case 'B':
+                    return const.KEY_DOWN
+                case _:
+                    return '\x1b'
+        case _ as ch:
+            return ch
 
-    if ch in const.KEY_MAPPING:
-        return const.KEY_MAPPING[ch]
-    elif ch == '\x1b':
-        next_ch = getch()
-        if next_ch == '[':
-            last_ch = getch()
 
-            if last_ch == 'A':
-                return const.KEY_UP
-            elif last_ch == 'B':
-                return const.KEY_DOWN
-
-    return ch
-
-
-def open_command(arg):
-    if find_executable('xdg-open'):
+def open_command(arg: str) -> str:
+    if which('xdg-open'):
         return 'xdg-open ' + arg
     return 'open ' + arg
-
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
-
-
-def _expanduser(self):
-    return self.__class__(os.path.expanduser(str(self)))
-
-
-if not hasattr(Path, 'expanduser'):
-    Path.expanduser = _expanduser

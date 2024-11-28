@@ -3,7 +3,11 @@ implement `from_shell`, `to_shell`, `app_alias`, `put_to_history` and
 `get_aliases` methods.
 """
 import os
+
+from pathlib import Path
 from psutil import Process
+from typing import Dict
+
 from .bash import Bash
 from .fish import Fish
 from .generic import Generic
@@ -11,42 +15,33 @@ from .tcsh import Tcsh
 from .zsh import Zsh
 from .powershell import Powershell
 
-shells = {'bash': Bash,
-          'fish': Fish,
-          'zsh': Zsh,
-          'csh': Tcsh,
-          'tcsh': Tcsh,
-          'powershell': Powershell,
-          'pwsh': Powershell}
+
+shells: Dict[str, type[Generic]] = {
+    'bash': Bash,
+    'fish': Fish,
+    'zsh': Zsh,
+    'csh': Tcsh,
+    'tcsh': Tcsh,
+    'powershell': Powershell,
+    'pwsh': Powershell,
+}
 
 
-def _get_shell_from_env():
-    name = os.environ.get('TF_SHELL')
-
+def _get_shell() -> Generic:
+    name = Path(
+        os.environ.get('FUCKOFF_SHELL') or
+        os.environ.get('SHELL') or
+        ''
+    ).stem
     if name in shells:
         return shells[name]()
 
-
-def _get_shell_from_proc():
-    proc = Process(os.getpid())
-
-    while proc is not None and proc.pid > 0:
-        try:
-            name = proc.name()
-        except TypeError:
-            name = proc.name
-
-        name = os.path.splitext(name)[0]
-
+    for proc in Process(os.getpid()).parents():
+        name = Path(proc.name()).stem
         if name in shells:
             return shells[name]()
-
-        try:
-            proc = proc.parent()
-        except TypeError:
-            proc = proc.parent
 
     return Generic()
 
 
-shell = _get_shell_from_env() or _get_shell_from_proc()
+shell = _get_shell()

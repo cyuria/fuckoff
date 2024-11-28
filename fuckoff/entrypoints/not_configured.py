@@ -4,52 +4,45 @@ from ..system import init_output
 init_output()
 
 import getpass  # noqa: E402
-import os  # noqa: E402
 import json  # noqa: E402
-from tempfile import gettempdir  # noqa: E402
+import os  # noqa: E402
 import time  # noqa: E402
-import six  # noqa: E402
-from psutil import Process  # noqa: E402
-from .. import logs, const  # noqa: E402
-from ..shells import shell  # noqa: E402
+
+from pathlib import Path  # noqa: E402
+from tempfile import gettempdir  # noqa: E402
+from typing import Dict  # noqa: E402
+
+from .. import const  # noqa: E402
+from .. import logs  # noqa: E402
 from ..conf import settings  # noqa: E402
-from ..system import Path  # noqa: E402
-
-
-def _get_shell_pid():
-    """Returns parent process pid."""
-    proc = Process(os.getpid())
-
-    try:
-        return proc.parent().pid
-    except TypeError:
-        return proc.parent.pid
+from ..shells import shell  # noqa: E402
+from ..shells.generic import ShellConfiguration  # noqa: E402
 
 
 def _get_not_configured_usage_tracker_path():
     """Returns path of special file where we store latest shell pid."""
-    return Path(gettempdir()).joinpath(u'thefuck.last_not_configured_run_{}'.format(
+    return Path(gettempdir()).joinpath(u'fuckoff.last_not_configured_run_{}'.format(
         getpass.getuser(),
     ))
 
 
 def _record_first_run():
     """Records shell pid to tracker file."""
-    info = {'pid': _get_shell_pid(),
-            'time': time.time()}
+    info = {
+        'pid': os.getppid(),
+        'time': time.time(),
+    }
 
-    mode = 'wb' if six.PY2 else 'w'
-    with _get_not_configured_usage_tracker_path().open(mode) as tracker:
+    with _get_not_configured_usage_tracker_path().open('w') as tracker:
         json.dump(info, tracker)
 
 
 def _get_previous_command():
     history = shell.get_history()
 
-    if history:
-        return history[-1]
-    else:
+    if not history:
         return None
+    return history[-1]
 
 
 def _is_second_run():
@@ -58,25 +51,29 @@ def _is_second_run():
     if not tracker_path.exists():
         return False
 
-    current_pid = _get_shell_pid()
     with tracker_path.open('r') as tracker:
         try:
             info = json.load(tracker)
         except ValueError:
             return False
 
-    if not (isinstance(info, dict) and info.get('pid') == current_pid):
+    if not isinstance(info, Dict):
         return False
 
-    return (_get_previous_command() == 'fuck' or
-            time.time() - info.get('time', 0) < const.CONFIGURATION_TIMEOUT)
+    if not info.get('pid') == os.getppid():
+        return False
+
+    return (
+        _get_previous_command() == 'fuck' or
+        time.time() - info.get('time', 0) < const.CONFIGURATION_TIMEOUT
+    )
 
 
-def _is_already_configured(configuration_details):
+def _is_already_configured(configuration: ShellConfiguration) -> bool:
     """Returns `True` when alias already in shell config."""
-    path = Path(configuration_details.path).expanduser()
+    path = Path(configuration.path).expanduser()
     with path.open('r') as shell_config:
-        return configuration_details.content in shell_config.read()
+        return configuration.content in shell_config.read()
 
 
 def _configure(configuration_details):
@@ -96,19 +93,19 @@ def main():
 
     """
     settings.init()
-    configuration_details = shell.how_to_configure()
+    configuration = shell.how_to_configure()
     if (
-        configuration_details and
-        configuration_details.can_configure_automatically
+        configuration and
+        configuration.can_configure_automatically
     ):
-        if _is_already_configured(configuration_details):
-            logs.already_configured(configuration_details)
+        if _is_already_configured(configuration):
+            logs.already_configured(configuration)
             return
         elif _is_second_run():
-            _configure(configuration_details)
-            logs.configured_successfully(configuration_details)
+            _configure(configuration)
+            logs.configured_successfully(configuration)
             return
         else:
             _record_first_run()
 
-    logs.how_to_configure_alias(configuration_details)
+    logs.how_to_configure_alias(configuration)

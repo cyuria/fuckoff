@@ -1,20 +1,22 @@
+import importlib.util
 import os
 import sys
-from warnings import warn
-from six import text_type
+
+from pathlib import Path
+from typing import Optional
+
 from . import const
-from .system import Path
+from . import logs
+from .argument_parser import Arguments
 
-try:
-    import importlib.util
 
-    def load_source(name, pathname, _file=None):
-        module_spec = importlib.util.spec_from_file_location(name, pathname)
-        module = importlib.util.module_from_spec(module_spec)
-        module_spec.loader.exec_module(module)
-        return module
-except ImportError:
-    from imp import load_source
+def load_source(name, pathname):
+    spec = importlib.util.spec_from_file_location(name, pathname)
+    if spec is None or spec.loader is None:
+        raise Exception('Source file failed to load')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class Settings(dict):
@@ -24,9 +26,8 @@ class Settings(dict):
     def __setattr__(self, key, value):
         self[key] = value
 
-    def init(self, args=None):
+    def init(self, args: Optional[Arguments] = None):
         """Fills `settings` with values from `settings.py` and env."""
-        from .logs import exception
 
         self._setup_user_dir()
         self._init_settings_file()
@@ -34,12 +35,12 @@ class Settings(dict):
         try:
             self.update(self._settings_from_file())
         except Exception:
-            exception("Can't load settings from file", sys.exc_info())
+            logs.exception("Can't load settings from file", sys.exc_info())
 
         try:
             self.update(self._settings_from_env())
         except Exception:
-            exception("Can't load settings from env", sys.exc_info())
+            logs.exception("Can't load settings from env", sys.exc_info())
 
         self.update(self._settings_from_args(args))
 
@@ -54,16 +55,7 @@ class Settings(dict):
     def _get_user_dir_path(self):
         """Returns Path object representing the user config resource"""
         xdg_config_home = os.environ.get('XDG_CONFIG_HOME', '~/.config')
-        user_dir = Path(xdg_config_home, 'thefuck').expanduser()
-        legacy_user_dir = Path('~', '.thefuck').expanduser()
-
-        # For backward compatibility use legacy '~/.thefuck' if it exists:
-        if legacy_user_dir.is_dir():
-            warn(u'Config path {} is deprecated. Please move to {}'.format(
-                legacy_user_dir, user_dir))
-            return legacy_user_dir
-        else:
-            return user_dir
+        return Path(xdg_config_home, 'fuckoff').expanduser()
 
     def _setup_user_dir(self):
         """Returns user config dir, create it when it doesn't exist."""
@@ -76,11 +68,19 @@ class Settings(dict):
 
     def _settings_from_file(self):
         """Loads settings from file."""
-        settings = load_source(
-            'settings', text_type(self.user_dir.joinpath('settings.py')))
-        return {key: getattr(settings, key)
-                for key in const.DEFAULT_SETTINGS.keys()
-                if hasattr(settings, key)}
+        spec = importlib.util.spec_from_file_location(
+            'settings',
+            self.user_dir / 'settings.py'
+        )
+        if spec is None or spec.loader is None:
+            return {}
+        settings = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(settings)
+        return {
+            key: getattr(settings, key)
+            for key in const.DEFAULT_SETTINGS.keys()
+            if hasattr(settings, key)
+        }
 
     def _rules_from_env(self, val):
         """Transforms rules list from env-string to python."""

@@ -1,25 +1,21 @@
-name: thefuck
+name: fuckoff
 version: stable
-version-script: git -C parts/thefuck/build describe --abbrev=0 --tags
-summary: Magnificent app which corrects your previous console command.
+version-script: git -C parts/fuckoff/build describe --abbrev=0 --tags
+summary: A fork/rewrite of the excellent nvbn/thefuck
 description: |
-  The Fuck tries to match a rule for the previous command,
+  Fuckoff tries to match a rule for the previous command,
   creates a new command using the matched rule and runs it.
 
 grade: stable
 confinement: classic
 
 apps:
-  thefuck:
-    command: bin/thefuck
-    environment:
-        PYTHONIOENCODING: utf-8
+  fuckoff:
+    command: bin/fuckoff
   fuck:
     command: bin/fuck
-    environment:
-        PYTHONIOENCODING: utf-8
 
 parts:
-  thefuck:
-    source: https://github.com/nvbn/thefuck.git
+  fuckoff:
+    source: https://github.com/cyuria/fuckoff.git
     plugin: python

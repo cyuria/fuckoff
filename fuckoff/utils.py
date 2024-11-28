@@ -1,25 +1,26 @@
 import atexit
+import dbm
 import os
 import pickle
 import re
 import shelve
 import sys
-import six
+
 from decorator import decorator
 from difflib import get_close_matches as difflib_get_close_matches
+from pathlib import Path
 from functools import wraps
-from .logs import warn, exception
+
+from . import logs
 from .conf import settings
-from .system import Path
+from . import shells
 
 DEVNULL = open(os.devnull, 'w')
 
-if six.PY2:
-    import anydbm
-    shelve_open_error = anydbm.error
-else:
-    import dbm
-    shelve_open_error = dbm.error
+shelve_open_error = dbm.error
+
+
+_memoize_disabled = False
 
 
 def memoize(fn):
@@ -28,7 +29,7 @@ def memoize(fn):
 
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        if not memoize.disabled:
+        if not _memoize_disabled:
             key = pickle.dumps((args, kwargs))
             if key not in memo:
                 memo[key] = fn(*args, **kwargs)
@@ -40,34 +41,6 @@ def memoize(fn):
         return value
 
     return wrapper
-
-
-memoize.disabled = False
-
-
-@memoize
-def which(program):
-    """Returns `program` path or `None`."""
-    try:
-        from shutil import which
-
-        return which(program)
-    except ImportError:
-        def is_exe(fpath):
-            return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-        fpath, fname = os.path.split(program)
-        if fpath:
-            if is_exe(program):
-                return program
-        else:
-            for path in os.environ["PATH"].split(os.pathsep):
-                path = path.strip('"')
-                exe_file = os.path.join(path, program)
-                if is_exe(exe_file):
-                    return exe_file
-
-        return None
 
 
 def default_settings(params):
@@ -108,9 +81,8 @@ def include_path_in_search(path):
     return not any(path.startswith(x) for x in settings.excluded_search_path_prefixes)
 
 
-@memoize
 def get_all_executables():
-    from thefuck.shells import shell
+    from .shells import shell
 
     def _safe(fn, fallback):
         try:
@@ -119,16 +91,17 @@ def get_all_executables():
             return fallback
 
     tf_alias = get_alias()
-    tf_entry_points = ['thefuck', 'fuck']
+    tf_entry_points = ['fuckoff', 'fuck']
 
-    bins = [exe.name.decode('utf8') if six.PY2 else exe.name
-            for path in os.environ.get('PATH', '').split(os.pathsep)
-            if include_path_in_search(path)
-            for exe in _safe(lambda: list(Path(path).iterdir()), [])
-            if not _safe(exe.is_dir, True)
-            and exe.name not in tf_entry_points]
-    aliases = [alias.decode('utf8') if six.PY2 else alias
-               for alias in shell.get_aliases() if alias != tf_alias]
+    bins = [
+        exe.name
+        for path in os.environ.get('PATH', '').split(os.pathsep)
+        if include_path_in_search(path)
+        for exe in _safe(lambda: list(Path(path).iterdir()), [])
+        if not _safe(exe.is_dir, True)
+        and exe.name not in tf_entry_points
+    ]
+    aliases = [alias for alias in shell.get_aliases() if alias != tf_alias]
 
     return bins + aliases
 
@@ -171,7 +144,6 @@ def replace_command(command, broken, matched):
             for new_cmd in new_cmds]
 
 
-@memoize
 def is_app(command, *app_names, **kwargs):
     """Returns `True` if command is call to one of passed app names."""
 
@@ -200,24 +172,21 @@ class Cache(object):
     """Lazy read cache and save changes at exit."""
 
     def __init__(self):
-        self._db = None
-
-    def _init_db(self):
         try:
             self._setup_db()
         except Exception:
-            exception("Unable to init cache", sys.exc_info())
+            logs.exception("Unable to init cache", sys.exc_info())
             self._db = {}
 
     def _setup_db(self):
         cache_dir = self._get_cache_dir()
-        cache_path = Path(cache_dir).joinpath('thefuck').as_posix()
+        cache_path = Path(cache_dir).joinpath('fuckoff').as_posix()
 
         try:
             self._db = shelve.open(cache_path)
         except shelve_open_error + (ImportError,):
             # Caused when switching between Python versions
-            warn("Removing possibly out-dated cache")
+            logs.warn("Removing possibly out-dated cache")
             os.remove(cache_path)
             self._db = shelve.open(cache_path)
 
@@ -249,9 +218,6 @@ class Cache(object):
         return str(pickle.dumps(parts))
 
     def get_value(self, fn, depends_on, args, kwargs):
-        if self._db is None:
-            self._init_db()
-
         depends_on = [Path(name).expanduser().absolute().as_posix()
                       for name in depends_on]
         key = self._get_key(fn, depends_on, args, kwargs)
@@ -266,6 +232,7 @@ class Cache(object):
 
 
 _cache = Cache()
+_cache_disabled = False
 
 
 def cache(*depends_on):
@@ -278,10 +245,9 @@ def cache(*depends_on):
 
     """
     def cache_decorator(fn):
-        @memoize
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            if cache.disabled:
+            if _cache_disabled:
                 return fn(*args, **kwargs)
             else:
                 return _cache.get_value(fn, depends_on, args, kwargs)
@@ -291,22 +257,19 @@ def cache(*depends_on):
     return cache_decorator
 
 
-cache.disabled = False
-
-
 def get_installation_version():
     try:
         from importlib.metadata import version
 
-        return version('thefuck')
+        return version('fuckoff')
     except ImportError:
         import pkg_resources
 
-        return pkg_resources.require('thefuck')[0].version
+        return pkg_resources.require('fuckoff')[0].version
 
 
 def get_alias():
-    return os.environ.get('TF_ALIAS', 'fuck')
+    return os.environ.get('FUCKOFF_ALIAS', 'fuck')
 
 
 @memoize
@@ -321,27 +284,16 @@ def get_valid_history_without_current(command):
         if history:
             yield history[-1]
 
-    from thefuck.shells import shell
-    history = shell.get_history()
+    history = shells.shell.get_history()
     tf_alias = get_alias()
     executables = set(get_all_executables())\
-        .union(shell.get_builtin_commands())
+        .union(shells.shell.get_builtin_commands())
 
     return [line for line in _not_corrected(history, tf_alias)
             if not line.startswith(tf_alias) and not line == command.script
             and line.split(' ')[0] in executables]
 
 
-def format_raw_script(raw_script):
-    """Creates single script from a list of script parts.
-
-    :type raw_script: [basestring]
-    :rtype: basestring
-
-    """
-    if six.PY2:
-        script = ' '.join(arg.decode('utf-8') for arg in raw_script)
-    else:
-        script = ' '.join(raw_script)
-
-    return script.lstrip()
+def format_raw_script(raw_script: list[str]) -> str:
+    """Creates single script from a list of script parts."""
+    return ' '.join(raw_script).lstrip()

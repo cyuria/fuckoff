@@ -1,24 +1,25 @@
 import json
 import os
-import socket
-try:
-    from shutil import get_terminal_size
-except ImportError:
-    from backports.shutil_get_terminal_size import get_terminal_size
+from typing import Optional, TypedDict
 import pyte
+import socket
+
+from shutil import get_terminal_size
+
 from .. import const, logs
 
 
-def _get_socket_path():
-    return os.environ.get(const.SHELL_LOGGER_SOCKET_ENV)
+class Commands(TypedDict):
+    command: str
+    output: str
 
 
-def is_available():
-    """Returns `True` if shell logger socket available.
+def _get_socket_path() -> str:
+    return os.environ.get(const.SHELL_LOGGER_SOCKET_ENV, '')
 
-    :rtype: book
 
-    """
+def is_available() -> bool:
+    """Returns `True` if shell logger socket available."""
     path = _get_socket_path()
     if not path:
         return False
@@ -26,7 +27,7 @@ def is_available():
     return os.path.exists(path)
 
 
-def _get_last_n(n):
+def _get_last_n(n) -> list[Commands]:
     with socket.socket(socket.AF_UNIX) as client:
         client.connect(_get_socket_path())
         request = json.dumps({
@@ -38,7 +39,7 @@ def _get_last_n(n):
         return json.loads(response)['commands']
 
 
-def _get_output_lines(output):
+def _get_output_lines(output: str) -> list[str]:
     lines = output.split('\n')
     screen = pyte.Screen(get_terminal_size().columns, len(lines))
     stream = pyte.Stream(screen)
@@ -46,15 +47,17 @@ def _get_output_lines(output):
     return screen.display
 
 
-def get_output(script):
+def get_output(script) -> Optional[str]:
     """Gets command output from shell logger."""
     with logs.debug_time(u'Read output from external shell logger'):
         commands = _get_last_n(const.SHELL_LOGGER_LIMIT)
-        for command in commands:
-            if command['command'] == script:
-                lines = _get_output_lines(command['output'])
-                output = '\n'.join(lines).strip()
-                return output
-            else:
-                logs.warn("Output isn't available in shell logger")
-                return None
+        if not commands:
+            return None
+
+        if commands[0]['command'] != script:
+            logs.warn("Output isn't available in shell logger")
+            return None
+
+        lines = _get_output_lines(commands[0]['output'])
+        output = '\n'.join(lines).strip()
+        return output

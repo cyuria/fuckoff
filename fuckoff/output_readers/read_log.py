@@ -2,17 +2,18 @@ import os
 import shlex
 import mmap
 import re
-try:
-    from shutil import get_terminal_size
-except ImportError:
-    from backports.shutil_get_terminal_size import get_terminal_size
-import six
+from typing import Optional
 import pyte
+
+from collections.abc import Iterable
+from shutil import get_terminal_size
+
+from .. import const
+from .. import logs
 from ..exceptions import ScriptNotInLog
-from .. import const, logs
 
 
-def _group_by_calls(log):
+def _group_by_calls(log: Iterable[str]):
     ps1 = os.environ['PS1']
     ps1_newlines = ps1.count('\\n') + ps1.count('\n')
     ps1_counter = 0
@@ -40,9 +41,6 @@ def _group_by_calls(log):
 
 
 def _get_script_group_lines(grouped, script):
-    if six.PY2:
-        script = script.encode('utf-8')
-
     parts = shlex.split(script)
 
     for script_line, lines in reversed(grouped):
@@ -65,35 +63,27 @@ def _get_output_lines(script, log_file):
 
 
 def _skip_old_lines(log_file):
-    size = os.path.getsize(os.environ['THEFUCK_OUTPUT_LOG'])
+    size = os.path.getsize(os.environ['FUCKOFF_OUTPUT_LOG'])
     if size > const.LOG_SIZE_IN_BYTES:
         log_file.seek(size - const.LOG_SIZE_IN_BYTES)
 
 
-def get_output(script):
-    """Reads script output from log.
-
-    :type script: str
-    :rtype: str | None
-
-    """
-    if six.PY2:
-        logs.warn('Experimental instant mode is Python 3+ only')
-        return None
-
-    if 'THEFUCK_OUTPUT_LOG' not in os.environ:
+def get_output(script: str) -> Optional[str]:
+    """Reads script output from log."""
+    if 'FUCKOFF_OUTPUT_LOG' not in os.environ:
         logs.warn("Output log isn't specified")
         return None
 
     if const.USER_COMMAND_MARK not in os.environ.get('PS1', ''):
         logs.warn(
             "PS1 doesn't contain user command mark, please ensure "
-            "that PS1 is not changed after The Fuck alias initialization")
+            "that PS1 is not changed after Fuckoff alias initialization"
+        )
         return None
 
     try:
         with logs.debug_time(u'Read output from log'):
-            fd = os.open(os.environ['THEFUCK_OUTPUT_LOG'], os.O_RDONLY)
+            fd = os.open(os.environ['FUCKOFF_OUTPUT_LOG'], os.O_RDONLY)
             buffer = mmap.mmap(fd, const.LOG_SIZE_IN_BYTES, mmap.MAP_SHARED, mmap.PROT_READ)
             _skip_old_lines(buffer)
             lines = _get_output_lines(script, buffer)
