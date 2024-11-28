@@ -1,6 +1,6 @@
-from thefuck.specific.apt import apt_available
-from thefuck.specific.sudo import sudo_support
-from thefuck.utils import for_app
+from fuckoff.specific.apt import apt_available
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.utils import for_app
 
 enabled_by_default = apt_available
 
@@ -12,5 +12,5 @@ def match(command):
 
 
 @sudo_support
-def get_new_command(command):
+def get_new_command(_):
     return 'apt list --upgradable'

@@ -1,6 +1,7 @@
 import re
 import subprocess
-from thefuck.utils import replace_command, for_app, cache
+
+from fuckoff.utils import replace_command, for_app, cache
 
 
 @for_app('gulp')
@@ -12,6 +13,9 @@ def match(command):
 def get_gulp_tasks():
     proc = subprocess.Popen(['gulp', '--tasks-simple'],
                             stdout=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return []
     return [line.decode('utf-8')[:-1]
             for line in proc.stdout.readlines()]
 

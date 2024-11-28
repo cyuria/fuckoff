@@ -1,6 +1,7 @@
 import re
-from thefuck.specific.sudo import sudo_support
-from thefuck.utils import replace_command, for_app
+
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.utils import replace_command, for_app
 
 no_command = "Error: No such command"
 no_website = "hostscli.errors.WebsiteImportError"

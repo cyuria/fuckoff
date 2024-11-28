@@ -1,5 +1,6 @@
 import re
-from thefuck.utils import for_app
+
+from fuckoff.utils import for_app
 
 regex = re.compile(r'Run "(.*)" instead')
 

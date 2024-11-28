@@ -1,9 +1,11 @@
 import subprocess
-from itertools import dropwhile, islice, takewhile
 
-from thefuck.specific.sudo import sudo_support
-from thefuck.specific.yum import yum_available
-from thefuck.utils import for_app, replace_command, which, cache
+from itertools import dropwhile, islice, takewhile
+from shutil import which
+
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.specific.yum import yum_available
+from fuckoff.utils import for_app, replace_command, cache
 
 enabled_by_default = yum_available
 
@@ -16,6 +18,9 @@ def match(command):
 
 def _get_operations():
     proc = subprocess.Popen('yum', stdout=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return []
 
     lines = proc.stdout.readlines()
     lines = [line.decode('utf-8') for line in lines]

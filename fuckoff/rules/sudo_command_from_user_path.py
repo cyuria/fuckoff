@@ -1,18 +1,24 @@
 import re
-from thefuck.utils import for_app, which, replace_argument
+
+from shutil import which
+
+from fuckoff.utils import for_app, replace_argument
 
 
-def _get_command_name(command):
+def _get_command_name(command) -> str:
     found = re.findall(r'sudo: (.*): command not found', command.output)
     if found:
         return found[0]
+    else:
+        return ''
 
 
 @for_app('sudo')
 def match(command):
-    if 'command not found' in command.output:
-        command_name = _get_command_name(command)
-        return which(command_name)
+    if 'command not found' not in command.output:
+        return False
+    command_name = _get_command_name(command)
+    return which(command_name)
 
 
 def get_new_command(command):

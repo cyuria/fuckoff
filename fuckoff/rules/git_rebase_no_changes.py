@@ -1,4 +1,4 @@
-from thefuck.specific.git import git_support
+from fuckoff.specific.git import git_support
 
 
 @git_support
@@ -9,5 +9,5 @@ def match(command):
     )
 
 
-def get_new_command(command):
+def get_new_command(_):
     return 'git rebase --skip'

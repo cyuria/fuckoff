@@ -1,8 +1,11 @@
-from itertools import dropwhile, takewhile, islice
 import re
 import subprocess
-from thefuck.utils import replace_command, for_app, which, cache
-from thefuck.specific.sudo import sudo_support
+
+from itertools import dropwhile, takewhile, islice
+from shutil import which
+
+from fuckoff.utils import replace_command, for_app, cache
+from fuckoff.specific.sudo import sudo_support
 
 
 @sudo_support
@@ -20,6 +23,9 @@ def _parse_commands(lines, starts_with):
 
 def get_docker_commands():
     proc = subprocess.Popen('docker', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None or proc.stderr is None:
+        return []
 
     # Old version docker returns its output to stdout, while newer version returns to stderr.
     lines = proc.stdout.readlines() or proc.stderr.readlines()

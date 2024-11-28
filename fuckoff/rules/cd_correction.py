@@ -1,10 +1,10 @@
 """Attempts to spellcheck and correct failed cd commands"""
 
 import os
-import six
-from thefuck.specific.sudo import sudo_support
-from thefuck.rules import cd_mkdir
-from thefuck.utils import for_app, get_close_matches
+
+from fuckoff.rules import cd_mkdir
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.utils import for_app, get_close_matches
 
 __author__ = "mmussomele"
 
@@ -43,8 +43,6 @@ def get_new_command(command):
     if dest[0] == '':
         cwd = os.sep
         dest = dest[1:]
-    elif six.PY2:
-        cwd = os.getcwdu()
     else:
         cwd = os.getcwd()
     for directory in dest:

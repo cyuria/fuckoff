@@ -1,5 +1,6 @@
 import re
-from thefuck.utils import for_app
+
+from fuckoff.utils import for_app
 
 MISTAKE = r'(?<=Terraform has no command named ")([^"]+)(?="\.)'
 FIX = r'(?<=Did you mean ")([^"]+)(?="\?)'

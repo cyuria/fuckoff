@@ -1,11 +1,16 @@
-from itertools import dropwhile, islice, takewhile
 import subprocess
 
-from thefuck.utils import get_closest, replace_argument, for_app, which, cache
+from itertools import dropwhile, islice, takewhile
+from shutil import which
+
+from fuckoff.utils import get_closest, replace_argument, for_app, cache
 
 
 def get_golang_commands():
     proc = subprocess.Popen('go', stderr=subprocess.PIPE)
+    proc.wait()
+    if proc.stderr is None:
+        return []
     lines = [line.decode('utf-8').strip() for line in proc.stderr.readlines()]
     lines = dropwhile(lambda line: line != 'The commands are:', lines)
     lines = islice(lines, 2, None)

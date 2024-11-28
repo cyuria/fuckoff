@@ -1,5 +1,5 @@
-from thefuck.shells import shell
-from thefuck.utils import for_app
+from fuckoff.shells import shell
+from fuckoff.utils import for_app
 
 
 @for_app('tsuru')

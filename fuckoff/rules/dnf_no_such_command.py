@@ -1,8 +1,9 @@
 import subprocess
 import re
-from thefuck.specific.sudo import sudo_support
-from thefuck.utils import for_app, replace_command
-from thefuck.specific.dnf import dnf_available
+
+from fuckoff.specific.dnf import dnf_available
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.utils import for_app, replace_command
 
 
 regex = re.compile(r'No such command: (.*)\.')
@@ -23,6 +24,9 @@ def _get_operations():
     proc = subprocess.Popen(["dnf", '--help'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return []
     lines = proc.stdout.read().decode("utf-8")
 
     return _parse_operations(lines)

@@ -1,6 +1,6 @@
-from thefuck.shells import shell
-from thefuck.specific.git import git_support
-from thefuck.utils import memoize
+from fuckoff.shells import shell
+from fuckoff.specific.git import git_support
+from fuckoff.utils import memoize
 
 
 @memoize

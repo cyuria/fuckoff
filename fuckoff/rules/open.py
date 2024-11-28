@@ -5,8 +5,8 @@
 # The file ~/github.com does not exist.
 # Perhaps you meant 'http://github.com'?
 #
-from thefuck.shells import shell
-from thefuck.utils import eager, for_app
+from fuckoff.shells import shell
+from fuckoff.utils import eager, for_app
 
 
 def is_arg_url(command):

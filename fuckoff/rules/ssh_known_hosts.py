@@ -1,5 +1,6 @@
 import re
-from thefuck.utils import for_app
+
+from fuckoff.utils import for_app
 
 commands = ('ssh', 'scp')
 
@@ -24,7 +25,7 @@ def get_new_command(command):
     return command.script
 
 
-def side_effect(old_cmd, command):
+def side_effect(old_cmd, _):
     offending_pattern = re.compile(
         r'(?:Offending (?:key for IP|\S+ key)|Matching host key) in ([^:]+):(\d+)',
         re.MULTILINE)

@@ -1,5 +1,6 @@
 import re
-from thefuck.shells import shell
+
+from fuckoff.shells import shell
 
 
 patterns = (

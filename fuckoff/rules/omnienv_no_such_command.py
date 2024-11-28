@@ -1,7 +1,9 @@
 import re
-from thefuck.utils import (cache, for_app, replace_argument, replace_command,
-                           which)
+
+from shutil import which
 from subprocess import PIPE, Popen
+
+from fuckoff.utils import cache, for_app, replace_argument, replace_command
 
 
 supported_apps = 'goenv', 'nodenv', 'pyenv', 'rbenv'
@@ -21,6 +23,9 @@ def match(command):
 
 def get_app_commands(app):
     proc = Popen([app, 'commands'], stdout=PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return []
     return [line.decode('utf-8').strip() for line in proc.stdout.readlines()]
 
 

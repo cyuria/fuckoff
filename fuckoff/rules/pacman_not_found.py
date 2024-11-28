@@ -6,8 +6,8 @@ should be:
     yay -S llvm
 """
 
-from thefuck.utils import replace_command
-from thefuck.specific.archlinux import get_pkgfile, archlinux_env
+from fuckoff.specific.archlinux import get_pkgfile, archlinux_env
+from fuckoff.utils import replace_command
 
 
 def match(command):

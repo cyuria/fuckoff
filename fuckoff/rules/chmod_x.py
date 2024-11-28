@@ -1,5 +1,6 @@
 import os
-from thefuck.shells import shell
+
+from fuckoff.shells import shell
 
 
 def match(command):

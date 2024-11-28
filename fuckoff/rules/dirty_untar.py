@@ -1,7 +1,8 @@
 import tarfile
 import os
-from thefuck.utils import for_app
-from thefuck.shells import shell
+
+from fuckoff.shells import shell
+from fuckoff.utils import for_app
 
 
 tar_extensions = ('.tar', '.tar.Z', '.tar.bz2', '.tar.gz', '.tar.lz',
@@ -33,13 +34,18 @@ def match(command):
 
 
 def get_new_command(command):
-    dir = shell.quote(_tar_file(command.script_parts)[1])
-    return shell.and_('mkdir -p {dir}', '{cmd} -C {dir}') \
-        .format(dir=dir, cmd=command.script)
+    tar_file = _tar_file(command.script_parts)
+    if tar_file is None:
+        return []
+    return [shell.and_('mkdir -p {dir}', '{cmd} -C {dir}') \
+        .format(dir=shell.quote(tar_file[1]), cmd=command.script)]
 
 
-def side_effect(old_cmd, command):
-    with tarfile.TarFile(_tar_file(old_cmd.script_parts)[0]) as archive:
+def side_effect(old_cmd, _):
+    tar_file = _tar_file(old_cmd.script_parts)
+    if tar_file is None:
+        return
+    with tarfile.TarFile(tar_file[0]) as archive:
         for file in archive.getnames():
             if not os.path.abspath(file).startswith(os.getcwd()):
                 # it's unsafe to overwrite files outside of the current directory

@@ -1,8 +1,9 @@
 import re
 import os
-from thefuck.utils import memoize, default_settings
-from thefuck.conf import settings
-from thefuck.shells import shell
+
+from fuckoff.conf import settings
+from fuckoff.shells import shell
+from fuckoff.utils import memoize, default_settings
 
 
 # order is important: only the first match is considered
@@ -11,7 +12,7 @@ patterns = (
     '^    at {file}:{line}:{col}',
     # cargo:
     '^   {file}:{line}:{col}',
-    # python, thefuck:
+    # python, fuckoff:
     '^  File "{file}", line {line}',
     # awk:
     '^awk: {file}:{line}:',

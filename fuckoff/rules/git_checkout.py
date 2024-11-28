@@ -1,9 +1,10 @@
 import re
 import subprocess
-from thefuck import utils
-from thefuck.utils import replace_argument
-from thefuck.specific.git import git_support
-from thefuck.shells import shell
+
+from fuckoff import utils
+from fuckoff.shells import shell
+from fuckoff.specific.git import git_support
+from fuckoff.utils import replace_argument
 
 
 @git_support
@@ -16,6 +17,10 @@ def get_branches():
     proc = subprocess.Popen(
         ['git', 'branch', '-a', '--no-color', '--no-column'],
         stdout=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return
+
     for line in proc.stdout.readlines():
         line = line.decode('utf-8')
         if '->' in line:    # Remote HEAD like b'  remotes/origin/HEAD -> origin/master'

@@ -1,5 +1,6 @@
 import os
-from thefuck.utils import for_app
+
+from fuckoff.utils import for_app
 
 
 @for_app('cat', at_least=1)

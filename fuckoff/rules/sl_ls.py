@@ -10,5 +10,5 @@ def match(command):
     return command.script == 'sl'
 
 
-def get_new_command(command):
+def get_new_command(_):
     return 'ls'

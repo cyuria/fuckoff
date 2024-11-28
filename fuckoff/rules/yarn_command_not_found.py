@@ -1,7 +1,10 @@
 import re
+
+from shutil import which
 from subprocess import Popen, PIPE
-from thefuck.utils import (for_app, eager, replace_command, replace_argument,
-                           cache, which)
+
+from fuckoff.utils import (for_app, eager, replace_command, replace_argument,
+                           cache)
 
 regex = re.compile(r'error Command "(.*)" not found.')
 
@@ -17,6 +20,9 @@ npm_commands = {'require': 'add'}
 @eager
 def _get_all_tasks():
     proc = Popen(['yarn', '--help'], stdout=PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return
     should_yield = False
     for line in proc.stdout.readlines():
         line = line.decode().strip()

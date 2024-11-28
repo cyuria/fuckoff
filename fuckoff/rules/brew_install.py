@@ -1,6 +1,7 @@
 import re
-from thefuck.utils import for_app
-from thefuck.specific.brew import brew_available
+
+from fuckoff.specific.brew import brew_available
+from fuckoff.utils import for_app
 
 enabled_by_default = brew_available
 
@@ -20,5 +21,7 @@ def match(command):
 
 def get_new_command(command):
     matcher = re.search('Warning: No available formula with the name "(?:[^"]+)". Did you mean (.+)\\?', command.output)
+    if matcher is None:
+        return []
     suggestions = _get_suggestions(matcher.group(1))
     return ["brew install " + formula for formula in suggestions]

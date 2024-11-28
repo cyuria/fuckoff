@@ -1,6 +1,8 @@
 import re
+
 from subprocess import Popen, PIPE
-from thefuck.utils import for_app, replace_command, cache, eager
+
+from fuckoff.utils import for_app, replace_command, cache, eager
 
 
 @for_app('react-native')
@@ -12,6 +14,9 @@ def match(command):
 @eager
 def _get_commands():
     proc = Popen(['react-native', '--help'], stdout=PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return
     should_yield = False
     for line in proc.stdout.readlines():
         line = line.decode().strip()

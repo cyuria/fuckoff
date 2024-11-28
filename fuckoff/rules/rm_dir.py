@@ -1,5 +1,6 @@
 import re
-from thefuck.specific.sudo import sudo_support
+
+from fuckoff.specific.sudo import sudo_support
 
 
 @sudo_support

@@ -1,5 +1,6 @@
 import re
-from thefuck.utils import get_all_matched_commands, replace_command, for_app
+
+from fuckoff.utils import get_all_matched_commands, replace_command, for_app
 
 
 @for_app('tsuru')

@@ -1,7 +1,8 @@
 import subprocess
-from thefuck.specific.apt import apt_available
-from thefuck.specific.sudo import sudo_support
-from thefuck.utils import for_app, eager, replace_command
+
+from fuckoff.specific.apt import apt_available
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.utils import for_app, eager, replace_command
 
 enabled_by_default = apt_available
 
@@ -43,6 +44,9 @@ def _get_operations(app):
     proc = subprocess.Popen([app, '--help'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
+    if proc.stdout is None:
+        return iter(())
+
     lines = proc.stdout.readlines()
 
     if app == 'apt':

@@ -1,7 +1,7 @@
 import os
 import zipfile
-from thefuck.utils import for_app
-from thefuck.shells import shell
+from fuckoff.utils import for_app
+from fuckoff.shells import shell
 
 
 def _is_bad_zip(file):
@@ -38,12 +38,18 @@ def match(command):
 
 
 def get_new_command(command):
-    return u'{} -d {}'.format(
-        command.script, shell.quote(_zip_file(command)[:-4]))
+    zip_file = _zip_file(command)
+    if zip_file is None:
+        return []
+    return [u'{} -d {}'.format(
+        command.script, shell.quote(zip_file[:-4]))]
 
 
-def side_effect(old_cmd, command):
-    with zipfile.ZipFile(_zip_file(old_cmd), 'r') as archive:
+def side_effect(old_cmd, _):
+    zip_file = _zip_file(old_cmd)
+    if zip_file is None:
+        return
+    with zipfile.ZipFile(zip_file, 'r') as archive:
         for file in archive.namelist():
             if not os.path.abspath(file).startswith(os.getcwd()):
                 # it's unsafe to overwrite files outside of the current directory

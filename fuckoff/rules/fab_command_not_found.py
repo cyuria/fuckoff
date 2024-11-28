@@ -1,4 +1,4 @@
-from thefuck.utils import eager, get_closest, for_app
+from fuckoff.utils import eager, get_closest, for_app
 
 
 @for_app('fab')

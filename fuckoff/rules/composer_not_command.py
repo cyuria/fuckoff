@@ -1,5 +1,6 @@
 import re
-from thefuck.utils import replace_argument, for_app
+
+from fuckoff.utils import replace_argument, for_app
 
 
 @for_app('composer')

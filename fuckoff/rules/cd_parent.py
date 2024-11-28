@@ -12,5 +12,5 @@ def match(command):
     return command.script == 'cd..'
 
 
-def get_new_command(command):
+def get_new_command(_):
     return 'cd ..'

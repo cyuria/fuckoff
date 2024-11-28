@@ -1,6 +1,9 @@
 import re
 import subprocess
-from thefuck.utils import for_app, eager, replace_command, cache, which
+
+from shutil import which
+
+from fuckoff.utils import for_app, eager, replace_command, cache
 
 
 @for_app('gem')
@@ -18,6 +21,9 @@ def _get_unknown_command(command):
 def _get_all_commands():
     proc = subprocess.Popen(['gem', 'help', 'commands'],
                             stdout=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return
 
     for line in proc.stdout.readlines():
         line = line.decode()

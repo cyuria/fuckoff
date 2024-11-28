@@ -1,6 +1,6 @@
 import re
 from subprocess import Popen, PIPE
-from thefuck.utils import for_app, eager, get_closest, cache
+from fuckoff.utils import for_app, eager, get_closest, cache
 
 regex = re.compile(r'Warning: Task "(.*)" not found.')
 
@@ -14,6 +14,9 @@ def match(command):
 @eager
 def _get_all_tasks():
     proc = Popen(['grunt', '--help'], stdout=PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return
     should_yield = False
     for line in proc.stdout.readlines():
         line = line.decode().strip()

@@ -1,5 +1,6 @@
 import re
-from thefuck.shells import shell
+
+from fuckoff.shells import shell
 
 
 SUGGESTION_REGEX = r"To resolve this issue, run:\s+(.*?)\n"
@@ -10,5 +11,8 @@ def match(command):
 
 
 def get_new_command(command):
-    migration_script = re.search(SUGGESTION_REGEX, command.output).group(1)
+    search = re.search(SUGGESTION_REGEX, command.output)
+    if search is None:
+        return ''
+    migration_script = search.group(1)
     return shell.and_(migration_script, command.script)

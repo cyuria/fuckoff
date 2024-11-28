@@ -1,7 +1,8 @@
-from thefuck.specific.archlinux import archlinux_env
-from thefuck.specific.sudo import sudo_support
-from thefuck.utils import for_app
 import re
+
+from fuckoff.specific.archlinux import archlinux_env
+from fuckoff.specific.sudo import sudo_support
+from fuckoff.utils import for_app
 
 
 @sudo_support

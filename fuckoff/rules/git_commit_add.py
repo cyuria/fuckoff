@@ -1,5 +1,5 @@
-from thefuck.utils import eager, replace_argument
-from thefuck.specific.git import git_support
+from fuckoff.specific.git import git_support
+from fuckoff.utils import eager, replace_argument
 
 
 @git_support

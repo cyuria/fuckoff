@@ -1,5 +1,5 @@
-from thefuck.specific.archlinux import get_pkgfile, archlinux_env
-from thefuck.shells import shell
+from fuckoff.shells import shell
+from fuckoff.specific.archlinux import get_pkgfile, archlinux_env
 
 
 def match(command):

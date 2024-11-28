@@ -1,5 +1,6 @@
 import subprocess
-from thefuck.utils import for_app, replace_command, eager
+
+from fuckoff.utils import for_app, replace_command, eager
 
 
 @for_app('ifconfig')
@@ -11,6 +12,9 @@ def match(command):
 @eager
 def _get_possible_interfaces():
     proc = subprocess.Popen(['ifconfig', '-a'], stdout=subprocess.PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return
     for line in proc.stdout.readlines():
         line = line.decode()
         if line and line != '\n' and not line.startswith(' '):

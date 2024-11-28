@@ -1,5 +1,8 @@
 import os
-from thefuck.utils import for_app, which
+
+from shutil import which
+
+from fuckoff.utils import for_app
 
 
 @for_app('gradle')

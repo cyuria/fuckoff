@@ -1,5 +1,5 @@
-from thefuck.shells import shell
-from thefuck.specific.git import git_support
+from fuckoff.shells import shell
+from fuckoff.specific.git import git_support
 
 
 @git_support
@@ -10,7 +10,7 @@ def match(command):
 
 
 @git_support
-def get_new_command(command):
+def get_new_command(_):
     return shell.and_('git add --update', 'git stash pop', 'git reset .')
 
 

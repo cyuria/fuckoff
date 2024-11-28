@@ -1,5 +1,6 @@
 import re
-from thefuck.specific.git import git_support
+
+from fuckoff.specific.git import git_support
 
 error_pattern = "fatal: bad flag '(.*?)' used after filename"
 error_pattern2 = "fatal: option '(.*?)' must come before non-option arguments"
@@ -23,9 +24,11 @@ def get_new_command(command):
         if command_parts[index][0] != '-':
             filename_index = index
             break
+    else:
+        return []
 
     # swap them
     command_parts[bad_flag_index], command_parts[filename_index] = \
     command_parts[filename_index], command_parts[bad_flag_index]  # noqa: E122
 
-    return u' '.join(command_parts)
+    return [u' '.join(command_parts)]

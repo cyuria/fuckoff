@@ -1,8 +1,8 @@
-from thefuck.utils import for_app
+from fuckoff.utils import for_app
 
 
 @for_app('man', at_least=1)
-def match(command):
+def match(_):
     return True
 
 

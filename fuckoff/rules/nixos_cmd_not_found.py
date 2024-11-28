@@ -1,6 +1,7 @@
 import re
-from thefuck.specific.nix import nix_available
-from thefuck.shells import shell
+
+from fuckoff.shells import shell
+from fuckoff.specific.nix import nix_available
 
 regex = re.compile(r'nix-env -iA ([^\s]*)')
 enabled_by_default = nix_available

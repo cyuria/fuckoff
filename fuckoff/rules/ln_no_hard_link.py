@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Suggest creating symbolic link if hard link is not allowed.
 
 Example:
@@ -9,7 +8,8 @@ ln: ‘barDir’: hard link not allowed for directory
 """
 
 import re
-from thefuck.specific.sudo import sudo_support
+
+from fuckoff.specific.sudo import sudo_support
 
 
 @sudo_support

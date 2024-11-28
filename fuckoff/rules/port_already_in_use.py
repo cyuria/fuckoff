@@ -1,7 +1,10 @@
 import re
+
+from shutil import which
 from subprocess import Popen, PIPE
-from thefuck.utils import memoize, which
-from thefuck.shells import shell
+
+from fuckoff.utils import memoize
+from fuckoff.shells import shell
 
 enabled_by_default = bool(which('lsof'))
 
@@ -14,6 +17,9 @@ patterns = [r"bind on address \('.*', (?P<port>\d+)\)",
 @memoize
 def _get_pid_by_port(port):
     proc = Popen(['lsof', '-i', ':{}'.format(port)], stdout=PIPE)
+    proc.wait()
+    if proc.stdout is None:
+        return None
     lines = proc.stdout.read().decode().split('\n')
     if len(lines) > 1:
         return lines[1].split()[1]
