@@ -1,6 +1,6 @@
 import pytest
-from thefuck.specific.git import git_support
-from thefuck.types import Command
+from fuckoff.specific.git import git_support
+from fuckoff.types import Command
 
 
 @pytest.mark.parametrize('called, command, output', [
@@ -30,7 +30,7 @@ def test_git_support(called, command, output):
 @pytest.mark.parametrize('output', ['', None])
 def test_git_support_match(command, is_git, output):
     @git_support
-    def fn(command):
+    def fn(_):
         return True
 
     assert fn(Command(command, output)) == is_git

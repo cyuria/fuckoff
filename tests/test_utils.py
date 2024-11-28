@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 import warnings
+
 from mock import Mock, call, patch
-from thefuck.utils import default_settings, \
+
+from fuckoff.utils import default_settings, \
     memoize, get_closest, get_all_executables, replace_argument, \
     get_all_matched_commands, is_app, for_app, cache, \
     get_valid_history_without_current, _cache, get_close_matches
-from thefuck.types import Command
+from fuckoff.types import Command
 
 
 @pytest.mark.parametrize('override, old, new', [
@@ -51,12 +51,12 @@ class TestGetClosest(object):
 
 
 class TestGetCloseMatches(object):
-    @patch('thefuck.utils.difflib_get_close_matches')
+    @patch('fuckoff.utils.difflib_get_close_matches')
     def test_call_with_n(self, difflib_mock):
         get_close_matches('', [], 1)
         assert difflib_mock.call_args[0][2] == 1
 
-    @patch('thefuck.utils.difflib_get_close_matches')
+    @patch('fuckoff.utils.difflib_get_close_matches')
     def test_call_without_n(self, difflib_mock, settings):
         get_close_matches('', [])
         assert difflib_mock.call_args[0][2] == settings.get('num_close_matches')
@@ -64,7 +64,7 @@ class TestGetCloseMatches(object):
 
 @pytest.fixture
 def get_aliases(mocker):
-    mocker.patch('thefuck.shells.shell.get_aliases',
+    mocker.patch('fuckoff.shells.shell.get_aliases',
                  return_value=['vim', 'apt-get', 'fsck', 'fuck'])
 
 
@@ -89,7 +89,7 @@ def os_environ_pathsep(monkeypatch, path, pathsep):
     ('/foo:/bar:/baz:/foo/bar', ':'),
     (r'C:\\foo;C:\\bar;C:\\baz;C:\\foo\\bar', ';')])
 def test_get_all_executables_pathsep(path, pathsep):
-    with patch('thefuck.utils.Path') as Path_mock:
+    with patch('fuckoff.utils.Path') as Path_mock:
         get_all_executables()
         Path_mock.assert_has_calls([call(p) for p in path.split(pathsep)], True)
 
@@ -101,7 +101,7 @@ def test_get_all_executables_pathsep(path, pathsep):
 def test_get_all_executables_exclude_paths(path, pathsep, excluded, settings):
     settings.init()
     settings.excluded_search_path_prefixes = [excluded]
-    with patch('thefuck.utils.Path') as Path_mock:
+    with patch('fuckoff.utils.Path') as Path_mock:
         get_all_executables()
         path_list = path.split(pathsep)
         assert call(path_list[-1]) not in Path_mock.mock_calls
@@ -164,7 +164,7 @@ def test_is_app(script, names, result):
     ('hg diff', ['git', 'hub'], False)])
 def test_for_app(script, names, result):
     @for_app(*names)
-    def match(command):
+    def match(_):
         return True
 
     assert match(Command(script, '')) == result
@@ -177,6 +177,7 @@ class TestCache(object):
 
         class _Shelve(object):
             def __init__(self, path):
+                _ = path
                 pass
 
             def __setitem__(self, k, v):
@@ -191,17 +192,18 @@ class TestCache(object):
             def close(self):
                 return
 
-        mocker.patch('thefuck.utils.shelve.open', new_callable=lambda: _Shelve)
+        mocker.patch('fuckoff.utils.shelve.open', new_callable=lambda: _Shelve)
         return value
 
     @pytest.fixture(autouse=True)
     def enable_cache(self, monkeypatch, shelve):
-        monkeypatch.setattr('thefuck.utils.cache.disabled', False)
-        _cache._init_db()
+        _ = shelve
+        monkeypatch.setattr('fuckoff.utils._cache_disabled', False)
+        _cache.__init__()
 
     @pytest.fixture(autouse=True)
     def mtime(self, mocker):
-        mocker.patch('thefuck.utils.os.path.getmtime', return_value=0)
+        mocker.patch('fuckoff.utils.os.path.getmtime', return_value=0)
 
     @pytest.fixture
     def fn(self):
@@ -213,7 +215,7 @@ class TestCache(object):
 
     @pytest.fixture
     def key(self, monkeypatch):
-        monkeypatch.setattr('thefuck.utils.Cache._get_key',
+        monkeypatch.setattr('fuckoff.utils.Cache._get_key',
                             lambda *_: 'key')
         return 'key'
 
@@ -243,7 +245,7 @@ class TestGetValidHistoryWithoutCurrent(object):
 
     @pytest.fixture(autouse=True)
     def history(self, mocker):
-        mock = mocker.patch('thefuck.shells.shell.get_history')
+        mock = mocker.patch('fuckoff.shells.shell.get_history')
         #  Passing as an argument causes `UnicodeDecodeError`
         #  with newer pytest and python 2.7
         mock.return_value = ['le cat', 'fuck', 'ls cat',
@@ -252,7 +254,7 @@ class TestGetValidHistoryWithoutCurrent(object):
 
     @pytest.fixture(autouse=True)
     def alias(self, mocker):
-        return mocker.patch('thefuck.utils.get_alias',
+        return mocker.patch('fuckoff.utils.get_alias',
                             return_value='fuck')
 
     @pytest.fixture(autouse=True)
@@ -263,7 +265,7 @@ class TestGetValidHistoryWithoutCurrent(object):
             bin_mock.configure_mock(name=name, is_dir=lambda: False)
             callables.append(bin_mock)
         path_mock = mocker.Mock(iterdir=mocker.Mock(return_value=callables))
-        return mocker.patch('thefuck.utils.Path', return_value=path_mock)
+        return mocker.patch('fuckoff.utils.Path', return_value=path_mock)
 
     @pytest.mark.parametrize('script, result', [
         ('le cat', ['ls cat', 'diff x', u'café ô']),

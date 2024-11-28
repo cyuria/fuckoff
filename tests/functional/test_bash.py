@@ -1,14 +1,11 @@
 import pytest
-from tests.functional.plots import with_confirmation, without_confirmation, \
+
+from .plots import with_confirmation, without_confirmation, \
     refuse_with_confirmation, history_changed, history_not_changed, \
     select_command_with_arrows, how_to_configure
 
 
-python_3 = (u'thefuck/python3',
-            u'',
-            u'sh')
-
-python_2 = (u'thefuck/python2',
+python_3 = (u'fuckoff/python3',
             u'',
             u'sh')
 
@@ -17,14 +14,12 @@ init_bashrc = u'''echo '
 export SHELL=/bin/bash
 export PS1="$ "
 echo > $HISTFILE
-eval $(thefuck --alias {})
-echo "instant mode ready: $THEFUCK_INSTANT_MODE"
+eval $(fuckoff --alias {})
+echo "instant mode ready: $FUCKOFF_INSTANT_MODE"
 ' > ~/.bashrc'''
 
 
-@pytest.fixture(params=[(python_3, False),
-                        (python_3, True),
-                        (python_2, False)])
+@pytest.fixture(params=[(python_3, False), (python_3, True)])
 def proc(request, spawnu, TIMEOUT):
     container, instant_mode = request.param
     proc = spawnu(*container)

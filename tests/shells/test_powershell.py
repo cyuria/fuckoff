@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import pytest
-from thefuck.shells import Powershell
+
+from fuckoff.shells import Powershell
 
 
 @pytest.mark.usefixtures('isfile', 'no_memoize', 'no_cache')
@@ -12,7 +11,7 @@ class TestPowershell(object):
 
     @pytest.fixture(autouse=True)
     def Popen(self, mocker):
-        mock = mocker.patch('thefuck.shells.powershell.Popen')
+        mock = mocker.patch('fuckoff.shells.powershell.Popen')
         return mock
 
     def test_and_(self, shell):
@@ -21,16 +20,16 @@ class TestPowershell(object):
     def test_app_alias(self, shell):
         assert 'function fuck' in shell.app_alias('fuck')
         assert 'function FUCK' in shell.app_alias('FUCK')
-        assert 'thefuck' in shell.app_alias('fuck')
+        assert 'fuckoff' in shell.app_alias('fuck')
 
     def test_how_to_configure(self, shell):
         assert not shell.how_to_configure().can_configure_automatically
 
     @pytest.mark.parametrize('side_effect, expected_version, call_args', [
-        ([b'''Major  Minor  Build  Revision
+        (['''Major  Minor  Build  Revision
 -----  -----  -----  --------
 5      1      17763  316     \n'''], 'PowerShell 5.1.17763.316', ['powershell.exe']),
-        ([IOError, b'PowerShell 6.1.2\n'], 'PowerShell 6.1.2', ['powershell.exe', 'pwsh'])])
+        ([IOError, 'PowerShell 6.1.2\n'], 'PowerShell 6.1.2', ['powershell.exe', 'pwsh'])])
     def test_info(self, side_effect, expected_version, call_args, shell, Popen):
         Popen.return_value.stdout.read.side_effect = side_effect
         assert shell.info() == expected_version

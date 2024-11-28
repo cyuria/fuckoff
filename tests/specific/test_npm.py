@@ -1,9 +1,9 @@
-from io import BytesIO
+from io import StringIO
 
 import pytest
-from thefuck.specific.npm import get_scripts
+from fuckoff.specific.npm import get_scripts
 
-run_script_stdout = b'''
+run_script_stdout = '''
 Lifecycle scripts included in code-view-web:
   test
     jest
@@ -21,6 +21,6 @@ available via `npm run-script`:
 
 @pytest.mark.usefixtures('no_memoize')
 def test_get_scripts(mocker):
-    patch = mocker.patch('thefuck.specific.npm.Popen')
-    patch.return_value.stdout = BytesIO(run_script_stdout)
+    patch = mocker.patch('fuckoff.specific.npm.Popen')
+    patch.return_value.stdout = StringIO(run_script_stdout)
     assert get_scripts() == ['build', 'develop', 'watch-test']

@@ -1,13 +1,13 @@
 import pytest
-import six
 import os
+from io import StringIO
 from mock import Mock
-from thefuck import const
+from fuckoff import const
 
 
 @pytest.fixture
 def load_source(mocker):
-    return mocker.patch('thefuck.conf.load_source')
+    return mocker.patch('fuckoff.conf.load_source')
 
 
 def test_settings_defaults(load_source, settings):
@@ -46,16 +46,16 @@ class TestSettingsFromFile(object):
 @pytest.mark.usefixtures('load_source')
 class TestSettingsFromEnv(object):
     def test_from_env(self, os_environ, settings):
-        os_environ.update({'THEFUCK_RULES': 'bash:lisp',
-                           'THEFUCK_EXCLUDE_RULES': 'git:vim',
-                           'THEFUCK_WAIT_COMMAND': '55',
-                           'THEFUCK_REQUIRE_CONFIRMATION': 'true',
-                           'THEFUCK_NO_COLORS': 'false',
-                           'THEFUCK_PRIORITY': 'bash=10:lisp=wrong:vim=15',
-                           'THEFUCK_WAIT_SLOW_COMMAND': '999',
-                           'THEFUCK_SLOW_COMMANDS': 'lein:react-native:./gradlew',
-                           'THEFUCK_NUM_CLOSE_MATCHES': '359',
-                           'THEFUCK_EXCLUDED_SEARCH_PATH_PREFIXES': '/media/:/mnt/'})
+        os_environ.update({'FUCKOFF_RULES': 'bash:lisp',
+                           'FUCKOFF_EXCLUDE_RULES': 'git:vim',
+                           'FUCKOFF_WAIT_COMMAND': '55',
+                           'FUCKOFF_REQUIRE_CONFIRMATION': 'true',
+                           'FUCKOFF_NO_COLORS': 'false',
+                           'FUCKOFF_PRIORITY': 'bash=10:lisp=wrong:vim=15',
+                           'FUCKOFF_WAIT_SLOW_COMMAND': '999',
+                           'FUCKOFF_SLOW_COMMANDS': 'lein:react-native:./gradlew',
+                           'FUCKOFF_NUM_CLOSE_MATCHES': '359',
+                           'FUCKOFF_EXCLUDED_SEARCH_PATH_PREFIXES': '/media/:/mnt/'})
         settings.init()
         assert settings.rules == ['bash', 'lisp']
         assert settings.exclude_rules == ['git', 'vim']
@@ -69,7 +69,7 @@ class TestSettingsFromEnv(object):
         assert settings.excluded_search_path_prefixes == ['/media/', '/mnt/']
 
     def test_from_env_with_DEFAULT(self, os_environ, settings):
-        os_environ.update({'THEFUCK_RULES': 'DEFAULT_RULES:bash:lisp'})
+        os_environ.update({'FUCKOFF_RULES': 'DEFAULT_RULES:bash:lisp'})
         settings.init()
         assert settings.rules == const.DEFAULT_RULES + ['bash', 'lisp']
 
@@ -90,11 +90,11 @@ class TestInitializeSettingsFile(object):
         assert not settings_path_mock.open.called
 
     def test_create_if_doesnt_exists(self, settings):
-        settings_file = six.StringIO()
+        settings_file = StringIO()
         settings_path_mock = Mock(
             is_file=Mock(return_value=False),
             open=Mock(return_value=Mock(
-                __exit__=lambda *args: None, __enter__=lambda *args: settings_file)))
+                __exit__=lambda *_: None, __enter__=lambda *_: settings_file)))
         settings.user_dir = Mock(joinpath=Mock(return_value=settings_path_mock))
         settings._init_settings_file()
         settings_file_contents = settings_file.getvalue()
@@ -106,16 +106,15 @@ class TestInitializeSettingsFile(object):
         settings_file.close()
 
 
-@pytest.mark.parametrize('legacy_dir_exists, xdg_config_home, result', [
-    (False, '~/.config', '~/.config/thefuck'),
-    (False, '/user/test/config/', '/user/test/config/thefuck'),
-    (True, '~/.config', '~/.thefuck'),
-    (True, '/user/test/config/', '~/.thefuck')])
-def test_get_user_dir_path(mocker, os_environ, settings, legacy_dir_exists,
-                           xdg_config_home, result):
-    mocker.patch('thefuck.conf.Path.is_dir',
-                 return_value=legacy_dir_exists)
-
+@pytest.mark.parametrize('xdg_config_home, result', [
+    ('~/.config', '~/.config/fuckoff'),
+    ('/user/test/config/', '/user/test/config/fuckoff')])
+def test_get_user_dir_path(
+        os_environ,
+        settings,
+        xdg_config_home,
+        result
+):
     if xdg_config_home is not None:
         os_environ['XDG_CONFIG_HOME'] = xdg_config_home
     else:

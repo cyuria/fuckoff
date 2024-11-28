@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import os
 import pytest
-from thefuck.shells import Bash
+
+from fuckoff.shells import Bash
 
 
 @pytest.mark.usefixtures('isfile', 'no_memoize', 'no_cache')
@@ -13,20 +12,20 @@ class TestBash(object):
 
     @pytest.fixture(autouse=True)
     def Popen(self, mocker):
-        mock = mocker.patch('thefuck.shells.bash.Popen')
+        mock = mocker.patch('fuckoff.shells.bash.Popen')
         return mock
 
     @pytest.fixture(autouse=True)
     def shell_aliases(self):
-        os.environ['TF_SHELL_ALIASES'] = (
-            'alias fuck=\'eval $(thefuck $(fc -ln -1))\'\n'
+        os.environ['FUCKOFF_SHELL_ALIASES'] = (
+            'alias fuck=\'eval $(fuckoff $(fc -ln -1))\'\n'
             'alias l=\'ls -CF\'\n'
             'alias la=\'ls -A\'\n'
             'alias ll=\'ls -alF\'')
 
     @pytest.mark.parametrize('before, after', [
         ('pwd', 'pwd'),
-        ('fuck', 'eval $(thefuck $(fc -ln -1))'),
+        ('fuck', 'eval $(fuckoff $(fc -ln -1))'),
         ('awk', 'awk'),
         ('ll', 'ls -alF')])
     def test_from_shell(self, before, after, shell):
@@ -42,7 +41,7 @@ class TestBash(object):
         assert shell.or_('ls', 'cd') == 'ls || cd'
 
     def test_get_aliases(self, shell):
-        assert shell.get_aliases() == {'fuck': 'eval $(thefuck $(fc -ln -1))',
+        assert shell.get_aliases() == {'fuck': 'eval $(fuckoff $(fc -ln -1))',
                                        'l': 'ls -CF',
                                        'la': 'ls -A',
                                        'll': 'ls -alF'}
@@ -50,16 +49,14 @@ class TestBash(object):
     def test_app_alias(self, shell):
         assert 'fuck () {' in shell.app_alias('fuck')
         assert 'FUCK () {' in shell.app_alias('FUCK')
-        assert 'thefuck' in shell.app_alias('fuck')
-        assert 'PYTHONIOENCODING' in shell.app_alias('fuck')
+        assert 'fuckoff' in shell.app_alias('fuck')
 
     def test_app_alias_variables_correctly_set(self, shell):
         alias = shell.app_alias('fuck')
         assert "fuck () {" in alias
-        assert 'TF_SHELL=bash' in alias
-        assert "TF_ALIAS=fuck" in alias
-        assert 'PYTHONIOENCODING=utf-8' in alias
-        assert 'TF_SHELL_ALIASES=$(alias)' in alias
+        assert 'FUCKOFF_SHELL=bash' in alias
+        assert "FUCKOFF_ALIAS=fuck" in alias
+        assert 'FUCKOFF_SHELL_ALIASES=$(alias)' in alias
 
     def test_get_history(self, history_lines, shell):
         history_lines(['ls', 'rm'])
@@ -80,11 +77,11 @@ class TestBash(object):
         assert not shell.how_to_configure().can_configure_automatically
 
     def test_info(self, shell, Popen):
-        Popen.return_value.stdout.read.side_effect = [b'3.5.9']
+        Popen.return_value.stdout.read.side_effect = ['3.5.9']
         assert shell.info() == 'Bash 3.5.9'
 
     def test_get_version_error(self, shell, Popen):
         Popen.return_value.stdout.read.side_effect = OSError
         with pytest.raises(OSError):
             shell._get_version()
-        assert Popen.call_args[0][0] == ['bash', '-c', 'echo $BASH_VERSION']
+        assert Popen.call_args[0][0] == ['bash', '--norc', '--noprofile', '-c', 'echo $BASH_VERSION']

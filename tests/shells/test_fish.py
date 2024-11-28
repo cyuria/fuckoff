@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import pytest
-from thefuck.const import ARGUMENT_PLACEHOLDER
-from thefuck.shells import Fish
+
+from fuckoff.shells import Fish
 
 
 @pytest.mark.usefixtures('isfile', 'no_memoize', 'no_cache')
@@ -13,25 +11,25 @@ class TestFish(object):
 
     @pytest.fixture(autouse=True)
     def Popen(self, mocker):
-        mock = mocker.patch('thefuck.shells.fish.Popen')
+        mock = mocker.patch('fuckoff.shells.fish.Popen')
         mock.return_value.stdout.read.side_effect = [(
-            b'cd\nfish_config\nfuck\nfunced\nfuncsave\ngrep\nhistory\nll\nls\n'
-            b'man\nmath\npopd\npushd\nruby'),
-            (b'alias fish_key_reader /usr/bin/fish_key_reader\nalias g git\n'
-             b'alias alias_with_equal_sign=echo\ninvalid_alias'), b'func1\nfunc2', b'']
+            'cd\nfish_config\nfuck\nfunced\nfuncsave\ngrep\nhistory\nll\nls\n'
+            'man\nmath\npopd\npushd\nruby'),
+            ('alias fish_key_reader /usr/bin/fish_key_reader\nalias g git\n'
+             'alias alias_with_equal_sign=echo\ninvalid_alias'), 'func1\nfunc2', '']
         return mock
 
     @pytest.mark.parametrize('key, value', [
-        ('TF_OVERRIDDEN_ALIASES', 'cut,git,sed'),  # legacy
-        ('THEFUCK_OVERRIDDEN_ALIASES', 'cut,git,sed'),
-        ('THEFUCK_OVERRIDDEN_ALIASES', 'cut, git, sed'),
-        ('THEFUCK_OVERRIDDEN_ALIASES', ' cut,\tgit,sed\n'),
-        ('THEFUCK_OVERRIDDEN_ALIASES', '\ncut,\n\ngit,\tsed\r')])
+        ('FUCKOFF_OVERRIDDEN_ALIASES', 'cut,git,sed'),
+        ('FUCKOFF_OVERRIDDEN_ALIASES', 'cut, git, sed'),
+        ('FUCKOFF_OVERRIDDEN_ALIASES', ' cut,\tgit,sed\n'),
+        ('FUCKOFF_OVERRIDDEN_ALIASES', '\ncut,\n\ngit,\tsed\r')])
     def test_get_overridden_aliases(self, shell, os_environ, key, value):
         os_environ[key] = value
         overridden = shell._get_overridden_aliases()
-        assert set(overridden) == {'cd', 'cut', 'git', 'grep',
-                                   'ls', 'man', 'open', 'sed'}
+        assert set(overridden) == {
+            'cd', 'cut', 'git', 'grep', 'ls', 'man', 'open', 'sed'
+        }
 
     @pytest.mark.parametrize('before, after', [
         ('cd', 'cd'),
@@ -61,29 +59,32 @@ class TestFish(object):
         assert shell.or_('foo', 'bar') == 'foo; or bar'
 
     def test_get_aliases(self, shell):
-        assert shell.get_aliases() == {'fish_config': 'fish_config',
-                                       'fuck': 'fuck',
-                                       'funced': 'funced',
-                                       'funcsave': 'funcsave',
-                                       'history': 'history',
-                                       'll': 'll',
-                                       'math': 'math',
-                                       'popd': 'popd',
-                                       'pushd': 'pushd',
-                                       'ruby': 'ruby',
-                                       'g': 'git',
-                                       'fish_key_reader': '/usr/bin/fish_key_reader',
-                                       'alias_with_equal_sign': 'echo'}
-        assert shell.get_aliases() == {'func1': 'func1', 'func2': 'func2'}
+        assert shell.get_aliases() == {
+            'fish_config': 'fish_config',
+            'fuck': 'fuck',
+            'funced': 'funced',
+            'funcsave': 'funcsave',
+            'history': 'history',
+            'll': 'll',
+            'math': 'math',
+            'popd': 'popd',
+            'pushd': 'pushd',
+            'ruby': 'ruby',
+            'g': 'git',
+            'fish_key_reader': '/usr/bin/fish_key_reader',
+            'alias_with_equal_sign': 'echo'
+        }
+        assert shell.get_aliases() == {
+            'func1': 'func1',
+            'func2': 'func2'
+        }
 
     def test_app_alias(self, shell):
         assert 'function fuck' in shell.app_alias('fuck')
         assert 'function FUCK' in shell.app_alias('FUCK')
-        assert 'thefuck' in shell.app_alias('fuck')
-        assert 'TF_SHELL=fish' in shell.app_alias('fuck')
-        assert 'TF_ALIAS=fuck PYTHONIOENCODING' in shell.app_alias('fuck')
-        assert 'PYTHONIOENCODING=utf-8 thefuck' in shell.app_alias('fuck')
-        assert ARGUMENT_PLACEHOLDER in shell.app_alias('fuck')
+        assert 'fuckoff' in shell.app_alias('fuck')
+        assert 'FUCKOFF_SHELL=fish' in shell.app_alias('fuck')
+        assert 'FUCKOFF_ALIAS=fuck' in shell.app_alias('fuck')
 
     def test_app_alias_alter_history(self, settings, shell):
         settings.alter_history = True
@@ -105,7 +106,7 @@ class TestFish(object):
         ('ls', '- cmd: ls\n   when: 1430707243\n'),
         (u'echo café', '- cmd: echo café\n   when: 1430707243\n')])
     def test_put_to_history(self, entry, entry_utf8, builtins_open, mocker, shell):
-        mocker.patch('thefuck.shells.fish.time', return_value=1430707243.3517463)
+        mocker.patch('fuckoff.shells.fish.time', return_value=1430707243.3517463)
         shell.put_to_history(entry)
         builtins_open.return_value.__enter__.return_value. \
             write.assert_called_once_with(entry_utf8)
@@ -120,12 +121,12 @@ class TestFish(object):
         assert not shell.how_to_configure().can_configure_automatically
 
     def test_get_version(self, shell, Popen):
-        Popen.return_value.stdout.read.side_effect = [b'fish, version 3.5.9\n']
+        Popen.return_value.stdout.read.side_effect = ['fish, version 3.5.9\n']
         assert shell._get_version() == '3.5.9'
         assert Popen.call_args[0][0] == ['fish', '--version']
 
     @pytest.mark.parametrize('side_effect, exception', [
-        ([b'\n'], IndexError),
+        (['\n'], IndexError),
         (OSError('file not found'), OSError),
     ])
     def test_get_version_error(self, side_effect, exception, shell, Popen):

@@ -3,7 +3,7 @@ import pytest
 
 @pytest.fixture
 def builtins_open(mocker):
-    return mocker.patch('six.moves.builtins.open')
+    return mocker.patch('builtins.open')
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def isfile(mocker):
 @pytest.mark.usefixtures('isfile')
 def history_lines(mocker):
     def aux(lines):
-        mock = mocker.patch('io.open')
+        mock = mocker.patch('builtins.open')
         mock.return_value.__enter__ \
             .return_value.readlines.return_value = lines
 
@@ -24,7 +24,7 @@ def history_lines(mocker):
 
 @pytest.fixture
 def config_exists(mocker):
-    path_mock = mocker.patch('thefuck.shells.generic.Path')
+    path_mock = mocker.patch('fuckoff.shells.generic.Path')
     return path_mock.return_value \
         .expanduser.return_value \
         .exists
