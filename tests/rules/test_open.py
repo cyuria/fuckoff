@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.open import is_arg_url, match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.open import is_arg_url, match, get_new_command
+from fuckoff.types import Command
 
 
 @pytest.fixture

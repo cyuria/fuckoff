@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.terraform_no_command import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.terraform_no_command import match, get_new_command
+from fuckoff.types import Command
 
 
 @pytest.mark.parametrize('script, output', [

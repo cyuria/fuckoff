@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.fab_command_not_found import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.fab_command_not_found import match, get_new_command
+from fuckoff.types import Command
 
 output = '''
 Warning: Command(s) not found:

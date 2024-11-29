@@ -1,7 +1,7 @@
 import pytest
 
-from thefuck.rules.az_cli import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.az_cli import match, get_new_command
+from fuckoff.types import Command
 
 
 no_suggestions = '''\

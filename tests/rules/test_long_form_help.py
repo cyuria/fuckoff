@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.long_form_help import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.long_form_help import match, get_new_command
+from fuckoff.types import Command
 
 
 @pytest.mark.parametrize('output', [
@@ -19,4 +19,4 @@ def test_not_match():
     ('docker run -h', 'docker run --help'),
     ('cut -h', 'cut --help')])
 def test_get_new_command(before, after):
-    assert get_new_command(Command(before, '')) == after
+    assert get_new_command(Command(before, '')) == [after]

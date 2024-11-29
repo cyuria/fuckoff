@@ -3,8 +3,8 @@
 import os
 import pytest
 import zipfile
-from thefuck.rules.dirty_unzip import match, get_new_command, side_effect
-from thefuck.types import Command
+from fuckoff.rules.dirty_unzip import match, get_new_command, side_effect
+from fuckoff.types import Command
 from unicodedata import normalize
 
 
@@ -68,4 +68,4 @@ def test_side_effect(zip_error, script, filename):
     (u'unzip foo.zip', u'unzip foo.zip -d foo', u'foo.zip')])
 def test_get_new_command(zip_error, script, fixed, filename):
     zip_error(filename)
-    assert get_new_command(Command(script, '')) == fixed
+    assert get_new_command(Command(script, '')) == [fixed]

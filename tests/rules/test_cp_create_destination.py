@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.cp_create_destination import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.cp_create_destination import match, get_new_command
+from fuckoff.types import Command
 
 
 @pytest.mark.parametrize(

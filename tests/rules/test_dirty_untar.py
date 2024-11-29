@@ -1,9 +1,9 @@
 import os
 import pytest
 import tarfile
-from thefuck.rules.dirty_untar import match, get_new_command, side_effect, \
+from fuckoff.rules.dirty_untar import match, get_new_command, side_effect, \
                                       tar_extensions  # noqa: E126
-from thefuck.types import Command
+from fuckoff.types import Command
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def tar_error(tmpdir):
                     os.remove(file)
 
             with tarfile.TarFile(path, 'r') as archive:
-                archive.extractall()
+                archive.extractall(filter='data')
 
         os.chdir(str(tmpdir))
         reset(path)
@@ -69,5 +69,7 @@ def test_side_effect(ext, tar_error, filename, unquoted, quoted, script, fixed):
 @parametrize_script
 def test_get_new_command(ext, tar_error, filename, unquoted, quoted, script, fixed):
     tar_error(unquoted.format(ext))
-    assert (get_new_command(Command(script.format(filename.format(ext)), ''))
-            == fixed.format(dir=quoted.format(''), filename=filename.format(ext)))
+    assert (
+        get_new_command(Command(script.format(filename.format(ext)), '')) ==
+        [fixed.format(dir=quoted.format(''), filename=filename.format(ext))]
+    )

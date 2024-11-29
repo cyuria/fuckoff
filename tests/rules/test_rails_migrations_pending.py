@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.rails_migrations_pending import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.rails_migrations_pending import match, get_new_command
+from fuckoff.types import Command
 
 output_env_development = '''
 Migrations are pending. To resolve this issue, run:

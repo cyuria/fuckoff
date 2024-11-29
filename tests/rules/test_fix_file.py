@@ -3,8 +3,8 @@
 import pytest
 import os
 from collections import namedtuple
-from thefuck.rules.fix_file import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.fix_file import match, get_new_command
+from fuckoff.types import Command
 
 FixFileTest = namedtuple('FixFileTest', ['script', 'file', 'line', 'col', 'output'])
 
@@ -157,7 +157,7 @@ ReferenceError: conole is not defined
 ./tests/rules/test_whois.py:22:80: E501 line too long (83 > 79 characters)
 """),
 
-    FixFileTest('pytest', '/home/thefuck/tests/rules/test_fix_file.py', 218, None, """
+    FixFileTest('pytest', '/home/fuckoff/tests/rules/test_fix_file.py', 218, None, """
 monkeypatch = <_pytest.monkeypatch.monkeypatch object at 0x7fdb76a25b38>
 test = ('fish a.sh', '/tmp/fix-error/a.sh', 2, None, '', "\\nfish: Unknown command 'foo'\\n/tmp/fix-error/a.sh (line 2): foo\\n                              ^\\n")
 
@@ -167,7 +167,7 @@ test = ('fish a.sh', '/tmp/fix-error/a.sh', 2, None, '', "\\nfish: Unknown comma
 >       mocker.patch('os.path.isfile', return_value=True)
 E       NameError: name 'mocker' is not defined
 
-/home/thefuck/tests/rules/test_fix_file.py:218: NameError
+/home/fuckoff/tests/rules/test_fix_file.py:218: NameError
 """),
 )
 

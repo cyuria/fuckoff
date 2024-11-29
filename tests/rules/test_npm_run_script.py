@@ -1,7 +1,7 @@
 import pytest
-from io import BytesIO
-from thefuck.rules.npm_run_script import match, get_new_command
-from thefuck.types import Command
+from io import StringIO
+from fuckoff.rules.npm_run_script import match, get_new_command
+from fuckoff.types import Command
 
 output = '''
 Usage: npm <command>
@@ -31,7 +31,7 @@ Config info can be viewed via: npm help config
 
 '''
 
-run_script_stdout = b'''
+run_script_stdout = '''
 Lifecycle scripts included in code-view-web:
   test
     jest
@@ -49,8 +49,8 @@ available via `npm run-script`:
 
 @pytest.fixture(autouse=True)
 def run_script(mocker):
-    patch = mocker.patch('thefuck.specific.npm.Popen')
-    patch.return_value.stdout = BytesIO(run_script_stdout)
+    patch = mocker.patch('fuckoff.specific.npm.Popen')
+    patch.return_value.stdout = StringIO(run_script_stdout)
     return patch.return_value
 
 
@@ -69,7 +69,7 @@ def test_match(script):
     (Command('npm test', output), run_script_stdout),
     (Command('vim watch-test', output), run_script_stdout)])
 def test_not_match(run_script, command, run_script_out):
-    run_script.stdout = BytesIO(run_script_out)
+    run_script.stdout = StringIO(run_script_out)
     assert not match(command)
 
 

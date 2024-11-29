@@ -1,7 +1,7 @@
 import pytest
 from io import BytesIO
-from thefuck.rules.go_unknown_command import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.go_unknown_command import match, get_new_command
+from fuckoff.types import Command
 
 
 @pytest.fixture

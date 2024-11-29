@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.git_flag_after_filename import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.git_flag_after_filename import match, get_new_command
+from fuckoff.types import Command
 
 command1 = Command('git log README.md -p',
                    "fatal: bad flag '-p' used after filename")
@@ -37,4 +37,4 @@ def test_not_match(command):
     (command5, "git log -p README.md CONTRIBUTING.md"),
     (command6, "git log -p --name-only README.md")])
 def test_get_new_command(command, result):
-    assert get_new_command(command) == result
+    assert get_new_command(command) == [result]

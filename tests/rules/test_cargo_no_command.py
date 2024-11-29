@@ -1,6 +1,6 @@
 import pytest
-from thefuck.rules.cargo_no_command import match, get_new_command
-from thefuck.types import Command
+from fuckoff.rules.cargo_no_command import match, get_new_command
+from fuckoff.types import Command
 
 
 no_such_subcommand_old = """No such subcommand

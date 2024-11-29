@@ -1,7 +1,7 @@
 import pytest
-from io import BytesIO
-from thefuck.types import Command
-from thefuck.rules.npm_missing_script import match, get_new_command
+from io import StringIO
+from fuckoff.types import Command
+from fuckoff.rules.npm_missing_script import match, get_new_command
 
 output = '''
 npm ERR! Linux 4.4.0-31-generic
@@ -18,7 +18,7 @@ npm ERR! Please include the following file with any support request:
 npm ERR!     /home/nvbn/exp/code_view/client_web/npm-debug.log
 '''.format
 
-run_script_stdout = b'''
+run_script_stdout = '''
 Lifecycle scripts included in code-view-web:
   test
     jest
@@ -36,8 +36,8 @@ available via `npm run-script`:
 
 @pytest.fixture(autouse=True)
 def run_script(mocker):
-    patch = mocker.patch('thefuck.specific.npm.Popen')
-    patch.return_value.stdout = BytesIO(run_script_stdout)
+    patch = mocker.patch('fuckoff.specific.npm.Popen')
+    patch.return_value.stdout = StringIO(run_script_stdout)
     return patch.return_value
 
 
