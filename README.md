@@ -1,4 +1,6 @@
-# Fuckoff [![Build Status][workflow-badge]][workflow-link] [![Coverage][coverage-badge]][coverage-link] [![MIT License][license-badge]](LICENSE.md)
+# Fuckoff
+
+[![Build Status][workflow-badge]][workflow-link] [![Coverage][coverage-badge]][coverage-link] [![MIT License][license-badge]](LICENSE.md)
 
 *Fuckoff* is a command line utility, forked from
 [nvbn/thefuck](https://github.com/nvbn/thefuck). It intends to achieve the same

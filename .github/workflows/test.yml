@@ -45,7 +45,7 @@ jobs:
       - name: Run tests (including functional)
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_LATEST
         run: |
-          docker build -t fuckoff/python3 -f tests/Dockerfile --build-arg PYTHON_VERSION=3 .
+          docker build -t fuckoff/python3 -f tests/Dockerfile .
           coverage run --source=fuckoff,tests -m pytest -v --capture=sys tests --enable-functional
       - name: Post coverage results
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_LATEST
