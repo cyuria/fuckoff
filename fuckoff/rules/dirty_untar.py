@@ -37,8 +37,10 @@ def get_new_command(command):
     tar_file = _tar_file(command.script_parts)
     if tar_file is None:
         return []
-    return [shell.and_('mkdir -p {dir}', '{cmd} -C {dir}') \
-        .format(dir=shell.quote(tar_file[1]), cmd=command.script)]
+    return [
+        shell.and_('mkdir -p {dir}', '{cmd} -C {dir}')
+             .format(dir=shell.quote(tar_file[1]), cmd=command.script)
+    ]
 
 
 def side_effect(old_cmd, _):

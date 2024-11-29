@@ -1,8 +1,9 @@
-from collections.abc import Iterable
 import os
 import sys
+
 from argparse import ArgumentParser, SUPPRESS
 from dataclasses import dataclass
+
 from .const import ARGUMENT_PLACEHOLDER
 
 

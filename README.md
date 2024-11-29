@@ -1,4 +1,4 @@
-# Fuckoff [![Version][version-badge]][version-link] [![Build Status][workflow-badge]][workflow-link] [![Coverage][coverage-badge]][coverage-link] [![MIT License][license-badge]](LICENSE.md)
+# Fuckoff [![Build Status][workflow-badge]][workflow-link] [![Coverage][coverage-badge]][coverage-link] [![MIT License][license-badge]](LICENSE.md)
 
 *Fuckoff* is a command line utility, forked from
 [nvbn/thefuck](https://github.com/nvbn/thefuck). It intends to achieve the same
@@ -493,8 +493,6 @@ The default behavior of *The Fuck* requires time to re-run previous commands.
 When in instant mode, *The Fuck* saves time by logging output with [script](https://en.wikipedia.org/wiki/Script_(Unix)),
 then reading the log.
 
-[![gif with instant mode][instant-mode-gif-link]][instant-mode-gif-link]
-
 Currently, instant mode only supports Python 3 with bash or zsh. zsh's autocorrect function also needs to be disabled in order for fuckoff to work properly.
 
 To enable instant mode, add `--enable-experimental-instant-mode`
@@ -510,7 +508,7 @@ eval $(fuckoff --alias --enable-experimental-instant-mode)
 
 ## Developing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+See [CONTRIBUTING.md]
 
 ## License MIT
 Project License can be found [here](LICENSE.md).
