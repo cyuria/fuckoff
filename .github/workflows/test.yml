@@ -3,7 +3,7 @@ name: Tests
 on: [push, pull_request]
 
 env:
-  PYTHON_LATEST: "3.11"
+  PYTHON_LATEST: "3.13"
 
 jobs:
   test:
