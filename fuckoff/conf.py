@@ -3,6 +3,7 @@ import os
 import sys
 
 from pathlib import Path
+from types import ModuleType
 from typing import Optional
 
 from . import const
@@ -10,8 +11,8 @@ from . import logs
 from .argument_parser import Arguments
 
 
-def load_source(name, pathname):
-    spec = importlib.util.spec_from_file_location(name, pathname)
+def load_source(name: str, path: str | Path) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         raise Exception('Source file failed to load')
     module = importlib.util.module_from_spec(spec)
@@ -68,14 +69,7 @@ class Settings(dict):
 
     def _settings_from_file(self):
         """Loads settings from file."""
-        spec = importlib.util.spec_from_file_location(
-            'settings',
-            self.user_dir / 'settings.py'
-        )
-        if spec is None or spec.loader is None:
-            return {}
-        settings = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(settings)
+        settings = load_source('settings', self.user_dir / 'settings.py')
         return {
             key: getattr(settings, key)
             for key in const.DEFAULT_SETTINGS.keys()
