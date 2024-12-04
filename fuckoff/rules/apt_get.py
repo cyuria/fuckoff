@@ -7,7 +7,7 @@ from fuckoff.utils import memoize
 from fuckoff.shells import shell
 
 try:
-    from CommandNotFound import CommandNotFound
+    from CommandNotFound import CommandNotFound  # type: ignore
 
     enabled_by_default = apt_available
 

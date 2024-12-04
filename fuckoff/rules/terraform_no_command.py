@@ -12,6 +12,8 @@ def match(command):
 
 
 def get_new_command(command):
-    mistake = re.search(MISTAKE, command.output).group(0)
-    fix = re.search(FIX, command.output).group(0)
-    return command.script.replace(mistake, fix)
+    mistake = re.search(MISTAKE, command.output)
+    fix = re.search(FIX, command.output)
+    if mistake is None or fix is None:
+        raise Exception('Rule incorrectly matched')
+    return command.script.replace(mistake.group(0), fix.group(0))

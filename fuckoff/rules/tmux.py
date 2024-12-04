@@ -12,6 +12,8 @@ def match(command):
 def get_new_command(command):
     cmd = re.match(r"ambiguous command: (.*), could be: (.*)",
                    command.output)
+    if cmd is None:
+        raise Exception('Rule incorrectly matched')
 
     old_cmd = cmd.group(1)
     suggestions = [c.strip() for c in cmd.group(2).split(',')]

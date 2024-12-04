@@ -7,7 +7,7 @@ from time import time
 
 from .generic import Generic
 from .. import logs
-from ..conf import settings
+from .. import conf
 from ..utils import DEVNULL, cache
 
 
@@ -60,7 +60,7 @@ class Fish(Generic):
             '    builtin history delete --exact'
             ' --case-sensitive -- $fucked_up_command\n'
             '    builtin history merge\n'
-        ) if settings.alter_history else ''
+        ) if conf.settings.alter_history else ''
         # It is VERY important to have the variables declared WITHIN the alias
         return (
             'function {0} -d "Correct your previous console command"\n'

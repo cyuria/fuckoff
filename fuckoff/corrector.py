@@ -77,7 +77,8 @@ def organize_commands(
 def get_corrected_commands(command: Command) -> Generator[CorrectedCommand]:
     """Returns generator with sorted and unique corrected commands."""
     return organize_commands(
-        corrected for rule in get_rules()
+        corrected
+        for rule in get_rules()
         if rule.is_match(command)
         for corrected in rule.get_corrected_commands(command)
     )

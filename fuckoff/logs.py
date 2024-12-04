@@ -6,14 +6,14 @@ from datetime import datetime
 from traceback import format_exception
 from typing import Optional
 
-from .conf import settings
+from . import conf
 from .const import USER_COMMAND_MARK
 from .shells.types import ShellConfiguration
 
 
 def color(color_: str):
     """Utility for ability to disabling colored output."""
-    return color_ if not settings.no_colors else ''
+    return color_ if not conf.settings.no_colors else ''
 
 
 def warn(title):
@@ -87,7 +87,7 @@ def confirm_text(corrected_command):
 
 
 def debug(msg):
-    if not settings.debug:
+    if not conf.settings.debug:
         return
     sys.stderr.write(u'{blue}{bold}DEBUG:{reset} {msg}\n'.format(
         msg=msg,

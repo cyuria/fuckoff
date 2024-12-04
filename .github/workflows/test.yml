@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: [push]
 
 env:
   PYTHON_LATEST: "3.13"
@@ -15,13 +15,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Cache dependencies
         id: cache-deps
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ${{ env.pythonLocation }}/bin/*
@@ -39,14 +40,25 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_LATEST
         run: flake8
 
+
+      - name: Run tests
+        if: matrix.os != 'windows-latest' && (matrix.os != 'ubuntu-latest' || matrix.python-version != env.PYTHON_LATEST)
+        run: coverage run --source=fuckoff,tests -m pytest -v --capture=sys tests
+
+      - name: Set Home Environment (windows)
+        if: matrix.os == 'windows-latest'
+        run: echo "USERPROFILE=$HOME" >> $env.GITHUB_ENV
+
       - name: Run tests
         if: matrix.os != 'ubuntu-latest' || matrix.python-version != env.PYTHON_LATEST
         run: coverage run --source=fuckoff,tests -m pytest -v --capture=sys tests
+
       - name: Run tests (including functional)
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_LATEST
         run: |
-          docker build -t fuckoff/python3 -f tests/Dockerfile --build-arg PYTHON_VERSION=3 .
+          docker build -t fuckoff/python3 -f tests/Dockerfile .
           coverage run --source=fuckoff,tests -m pytest -v --capture=sys tests --enable-functional
+
       - name: Post coverage results
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_LATEST
         env:

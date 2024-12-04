@@ -1,24 +1,12 @@
 import pytest
 import warnings
+import os
 
 from mock import Mock, call, patch
 
-from fuckoff.utils import default_settings, \
-    memoize, get_closest, get_all_executables, replace_argument, \
-    get_all_matched_commands, is_app, for_app, cache, \
-    get_valid_history_without_current, _cache, get_close_matches
+from fuckoff.conf import Settings
+from fuckoff.utils import memoize, get_closest, get_all_executables, replace_argument, get_all_matched_commands, is_app, for_app, cache, get_valid_history_without_current, _cache, get_close_matches
 from fuckoff.types import Command
-
-
-@pytest.mark.parametrize('override, old, new', [
-    ({'key': 'val'}, {}, {'key': 'val'}),
-    ({'key': 'new-val'}, {'key': 'val'}, {'key': 'val'}),
-    ({'key': 'new-val', 'unset': 'unset'}, {'key': 'val'}, {'key': 'val', 'unset': 'unset'})])
-def test_default_settings(settings, override, old, new):
-    settings.clear()
-    settings.update(old)
-    default_settings(override)(lambda _: _)(None)
-    assert settings == new
 
 
 def test_memoize():
@@ -57,9 +45,9 @@ class TestGetCloseMatches(object):
         assert difflib_mock.call_args[0][2] == 1
 
     @patch('fuckoff.utils.difflib_get_close_matches')
-    def test_call_without_n(self, difflib_mock, settings):
+    def test_call_without_n(self, difflib_mock, settings: Settings):
         get_close_matches('', [])
-        assert difflib_mock.call_args[0][2] == settings.get('num_close_matches')
+        assert difflib_mock.call_args[0][2] == settings.num_close_matches
 
 
 @pytest.fixture
@@ -79,6 +67,8 @@ def test_get_all_executables():
 @pytest.fixture
 def os_environ_pathsep(monkeypatch, path, pathsep):
     env = {'PATH': path}
+    if 'USERPROFILE' in os.environ:
+        env['USERPROFILE'] = os.environ['USERPROFILE']
     monkeypatch.setattr('os.environ', env)
     monkeypatch.setattr('os.pathsep', pathsep)
     return env

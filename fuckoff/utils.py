@@ -8,12 +8,12 @@ import sys
 
 from decorator import decorator
 from difflib import get_close_matches as difflib_get_close_matches
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
 
 from . import logs
-from .conf import settings
 from . import shells
+from . import conf
 
 DEVNULL = open(os.devnull, 'w')
 
@@ -43,23 +43,6 @@ def memoize(fn):
     return wrapper
 
 
-def default_settings(params):
-    """Adds default values to settings if it not presented.
-
-    Usage:
-
-        @default_settings({'apt': '/usr/bin/apt'})
-        def match(command):
-            print(settings.apt)
-
-    """
-    def _default_settings(fn, command):
-        for k, w in params.items():
-            settings.setdefault(k, w)
-        return fn(command)
-    return decorator(_default_settings)
-
-
 def get_closest(word, possibilities, cutoff=0.6, fallback_to_first=True):
     """Returns closest match or just first from possibilities."""
     possibilities = list(possibilities)
@@ -73,17 +56,15 @@ def get_closest(word, possibilities, cutoff=0.6, fallback_to_first=True):
 def get_close_matches(word, possibilities, n=None, cutoff=0.6):
     """Overrides `difflib.get_close_match` to control argument `n`."""
     if n is None:
-        n = settings.num_close_matches
+        n = conf.settings.num_close_matches
     return difflib_get_close_matches(word, possibilities, n, cutoff)
 
 
 def include_path_in_search(path):
-    return not any(path.startswith(x) for x in settings.excluded_search_path_prefixes)
+    return not any(path.startswith(x) for x in conf.settings.excluded_search_path_prefixes)
 
 
 def get_all_executables():
-    from .shells import shell
-
     def _safe(fn, fallback):
         try:
             return fn()
@@ -101,7 +82,7 @@ def get_all_executables():
         if not _safe(exe.is_dir, True)
         and exe.name not in tf_entry_points
     ]
-    aliases = [alias for alias in shell.get_aliases() if alias != tf_alias]
+    aliases = [alias for alias in shells.shell.get_aliases() if alias != tf_alias]
 
     return bins + aliases
 

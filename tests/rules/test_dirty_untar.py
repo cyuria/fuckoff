@@ -1,6 +1,8 @@
 import os
 import pytest
 import tarfile
+import sys
+
 from fuckoff.rules.dirty_untar import match, get_new_command, side_effect, \
                                       tar_extensions  # noqa: E126
 from fuckoff.types import Command
@@ -23,7 +25,10 @@ def tar_error(tmpdir):
                     os.remove(file)
 
             with tarfile.TarFile(path, 'r') as archive:
-                archive.extractall(filter='data')
+                if sys.version_info.minor >= 12:
+                    archive.extractall(filter='data')
+                else:
+                    archive.extractall()
 
         os.chdir(str(tmpdir))
         reset(path)

@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE, STDOUT
 from typing import Optional
 
 from .. import logs
-from ..conf import settings
+from .. import conf
 
 
 def _kill_process(proc: Process):
@@ -26,8 +26,8 @@ def _wait_output(popen: Popen, is_slow: bool) -> bool:
     Command will be killed if it wasn't finished in the time."""
     proc = Process(popen.pid)
     try:
-        proc.wait(settings.wait_slow_command if is_slow
-                  else settings.wait_command)
+        proc.wait(conf.settings.wait_slow_command if is_slow
+                  else conf.settings.wait_command)
         return True
     except TimeoutExpired:
         for child in proc.children(recursive=True):
@@ -39,12 +39,13 @@ def _wait_output(popen: Popen, is_slow: bool) -> bool:
 def get_output(script: str, expanded: str) -> Optional[str]:
     """Runs the script and obtains stdin/stderr."""
     env = dict(os.environ)
-    env.update(settings.env)
+    env.update(conf.settings.env)
 
     split_expand = shlex.split(expanded)
-    is_slow = split_expand[0] in settings.slow_commands if split_expand else False
+    is_slow = split_expand[0] in conf.settings.slow_commands if split_expand else False
     with logs.debug_time(u'Call: {}; with env: {}; is slow: {}'.format(
             script, env, is_slow)):
+        print(expanded)
         result = Popen(
             expanded,
             shell=True,

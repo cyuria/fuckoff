@@ -17,7 +17,7 @@ except pkg_resources.DistributionNotFound:
 if os.environ.get('CONVERT_README'):
     import pypandoc
 
-    long_description = pypandoc.convert('README.md', 'rst')
+    long_description = pypandoc.convert_file('README.md', 'rst')
 else:
     long_description = ''
 
@@ -27,7 +27,7 @@ if version < (3, 10):
           ' ({}.{} detected).'.format(*version))
     sys.exit(-1)
 
-VERSION = '3.32'
+VERSION = '0.1.0-alpha'
 
 install_requires = ['psutil', 'colorama', 'decorator', 'pyte']
 extras_require = {":sys_platform=='win32'": ['win_unicode_console']}

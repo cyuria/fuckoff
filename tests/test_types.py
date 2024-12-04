@@ -38,7 +38,7 @@ class TestCorrectedCommand(object):
          "git brunch || fuck --repeat --debug --force-command 'git brunch'",
          {'repeat': True, 'debug': True})])
     def test_run(self, capsys, settings, script, printed, override_settings):
-        settings.update(override_settings)
+        settings.update(**override_settings)
         CorrectedCommand(script, None, 1000).run(Command(script, ''))
         out, _ = capsys.readouterr()
         assert out == printed
@@ -46,7 +46,7 @@ class TestCorrectedCommand(object):
 
 class TestRule(object):
     def test_from_path_rule_exception(self, mocker):
-        load_source = mocker.patch('fuckoff.types.load_source',
+        load_source = mocker.patch('fuckoff.conf.load_source',
                                    side_effect=ImportError("No module named foo..."))
         assert Rule.from_path(Path('git.py')) is None
         load_source.assert_called_once_with('git', 'git.py')
@@ -59,7 +59,7 @@ class TestRule(object):
             return []
 
         load_source = mocker.patch(
-            'fuckoff.types.load_source',
+            'fuckoff.conf.load_source',
             return_value=Mock(
                 match=match,
                 get_new_command=get_new_command,
@@ -75,7 +75,7 @@ class TestRule(object):
         load_source.assert_called_once_with('bash', str(rule_path))
 
     def test_from_path_excluded_rule(self, mocker, settings):
-        load_source = mocker.patch('fuckoff.types.load_source')
+        load_source = mocker.patch('fuckoff.conf.load_source')
         settings.update(exclude_rules=['git'])
         rule_path = os.path.join(os.sep, 'rules', 'git.py')
         assert Rule.from_path(Path(rule_path)) is None
