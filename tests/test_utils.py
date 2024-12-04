@@ -1,5 +1,6 @@
 import pytest
 import warnings
+import os
 
 from mock import Mock, call, patch
 
@@ -66,6 +67,8 @@ def test_get_all_executables():
 @pytest.fixture
 def os_environ_pathsep(monkeypatch, path, pathsep):
     env = {'PATH': path}
+    if 'USERPROFILE' in os.environ:
+        env['USERPROFILE'] = os.environ['USERPROFILE']
     monkeypatch.setattr('os.environ', env)
     monkeypatch.setattr('os.pathsep', pathsep)
     return env

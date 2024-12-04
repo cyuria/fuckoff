@@ -68,5 +68,7 @@ def set_shell(monkeypatch):
 @pytest.fixture(autouse=True)
 def os_environ(monkeypatch):
     env = {'PATH': os.environ['PATH']}
+    if 'USERPROFILE' in os.environ:
+        env['USERPROFILE'] = os.environ['USERPROFILE']
     monkeypatch.setattr('os.environ', env)
     return env

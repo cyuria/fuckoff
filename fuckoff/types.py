@@ -152,8 +152,6 @@ class Rule(object):
     @property
     def is_enabled(self) -> bool:
         """Returns `True` when rule enabled."""
-        print(self)
-        print(conf.settings.rules)
         if self.enabled_by_default and ALL_ENABLED in conf.settings.rules:
             return True
         return self.name in conf.settings.rules

@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import os
 
@@ -123,4 +124,4 @@ def test_get_user_dir_path(
         os_environ.pop('XDG_CONFIG_HOME', None)
 
     path = conf._get_user_dir_path().as_posix()
-    assert path == os.path.expanduser(result)
+    assert path == Path(os.path.expanduser(result)).as_posix()
