@@ -34,6 +34,6 @@ def test_not_match(command, isdir):
     (Command('cat /foo/bar/', 'cat: /foo/bar/: Is a directory\n'), 'ls /foo/bar/'),
     (Command('cat cat', 'cat: cat: Is a directory\n'), 'ls cat'),
 ])
-def test_get_new_command(command, new_command):
+def test_get_new_command(command, new_command, isdir):
     isdir.return_value = True
     assert get_new_command(command) == new_command

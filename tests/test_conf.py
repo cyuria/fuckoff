@@ -1,7 +1,10 @@
 import pytest
 import os
+
 from io import StringIO
 from mock import Mock
+
+from fuckoff import conf
 from fuckoff import const
 
 
@@ -13,8 +16,8 @@ def load_source(mocker):
 def test_settings_defaults(load_source, settings):
     load_source.return_value = object()
     settings.init()
-    for key, val in const.DEFAULT_SETTINGS.items():
-        assert getattr(settings, key) == val
+    for key in vars(conf.Settings()):
+        assert getattr(settings, key) == getattr(conf.Settings(), key)
 
 
 class TestSettingsFromFile(object):
@@ -101,8 +104,8 @@ class TestInitializeSettingsFile(object):
         assert settings_path_mock.is_file.call_count == 1
         assert settings_path_mock.open.call_count == 1
         assert const.SETTINGS_HEADER in settings_file_contents
-        for setting in const.DEFAULT_SETTINGS.items():
-            assert '# {} = {}\n'.format(*setting) in settings_file_contents
+        for key in vars(conf.Settings()):
+            assert '# {} = {}\n'.format(key, getattr(conf.Settings(), key)) in settings_file_contents
         settings_file.close()
 
 
@@ -111,7 +114,6 @@ class TestInitializeSettingsFile(object):
     ('/user/test/config/', '/user/test/config/fuckoff')])
 def test_get_user_dir_path(
         os_environ,
-        settings,
         xdg_config_home,
         result
 ):
@@ -120,5 +122,5 @@ def test_get_user_dir_path(
     else:
         os_environ.pop('XDG_CONFIG_HOME', None)
 
-    path = settings._get_user_dir_path().as_posix()
+    path = conf._get_user_dir_path().as_posix()
     assert path == os.path.expanduser(result)

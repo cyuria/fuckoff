@@ -21,39 +21,23 @@ ALL_ENABLED = _genConst('All rules enabled')
 DEFAULT_RULES = [ALL_ENABLED]
 DEFAULT_PRIORITY = 1000
 
-DEFAULT_SETTINGS = {'rules': DEFAULT_RULES,
-                    'exclude_rules': [],
-                    'wait_command': 0.5,
-                    'require_confirmation': True,
-                    'no_colors': False,
-                    'debug': False,
-                    'priority': {},
-                    'history_limit': None,
-                    'alter_history': True,
-                    'wait_slow_command': 5,
-                    'slow_commands': ['lein', 'react-native', 'gradle',
-                                      './gradlew', 'vagrant'],
-                    'repeat': False,
-                    'instant_mode': False,
-                    'num_close_matches': 3,
-                    'env': {'LC_ALL': 'C', 'LANG': 'C', 'GIT_TRACE': '1'},
-                    'excluded_search_path_prefixes': []}
-
-ENV_TO_ATTR = {'FUCKOFF_RULES': 'rules',
-               'FUCKOFF_EXCLUDE_RULES': 'exclude_rules',
-               'FUCKOFF_WAIT_COMMAND': 'wait_command',
-               'FUCKOFF_REQUIRE_CONFIRMATION': 'require_confirmation',
-               'FUCKOFF_NO_COLORS': 'no_colors',
-               'FUCKOFF_DEBUG': 'debug',
-               'FUCKOFF_PRIORITY': 'priority',
-               'FUCKOFF_HISTORY_LIMIT': 'history_limit',
-               'FUCKOFF_ALTER_HISTORY': 'alter_history',
-               'FUCKOFF_WAIT_SLOW_COMMAND': 'wait_slow_command',
-               'FUCKOFF_SLOW_COMMANDS': 'slow_commands',
-               'FUCKOFF_REPEAT': 'repeat',
-               'FUCKOFF_INSTANT_MODE': 'instant_mode',
-               'FUCKOFF_NUM_CLOSE_MATCHES': 'num_close_matches',
-               'FUCKOFF_EXCLUDED_SEARCH_PATH_PREFIXES': 'excluded_search_path_prefixes'}
+ENV_TO_ATTR = {
+    'FUCKOFF_RULES': 'rules',
+    'FUCKOFF_EXCLUDE_RULES': 'exclude_rules',
+    'FUCKOFF_WAIT_COMMAND': 'wait_command',
+    'FUCKOFF_REQUIRE_CONFIRMATION': 'require_confirmation',
+    'FUCKOFF_NO_COLORS': 'no_colors',
+    'FUCKOFF_DEBUG': 'debug',
+    'FUCKOFF_PRIORITY': 'priority',
+    'FUCKOFF_HISTORY_LIMIT': 'history_limit',
+    'FUCKOFF_ALTER_HISTORY': 'alter_history',
+    'FUCKOFF_WAIT_SLOW_COMMAND': 'wait_slow_command',
+    'FUCKOFF_SLOW_COMMANDS': 'slow_commands',
+    'FUCKOFF_REPEAT': 'repeat',
+    'FUCKOFF_INSTANT_MODE': 'instant_mode',
+    'FUCKOFF_NUM_CLOSE_MATCHES': 'num_close_matches',
+    'FUCKOFF_EXCLUDED_SEARCH_PATH_PREFIXES': 'excluded_search_path_prefixes',
+}
 
 SETTINGS_HEADER = u"""# Fuckoff settings file
 #

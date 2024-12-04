@@ -2,12 +2,13 @@ from collections.abc import Iterable, Iterator
 import sys
 from typing import Optional
 
+from . import logs
+from . import const
+from . import conf
 from .types import CorrectedCommand
-from .conf import settings
 from .exceptions import NoRuleMatched
 from .system import get_key
 from .utils import get_alias
-from . import logs, const
 
 
 def read_actions():
@@ -57,7 +58,7 @@ def select_command(
      - selected command.
     """
 
-    if not settings.require_confirmation:
+    if not conf.settings.require_confirmation:
         try:
             corrected = next(corrected_commands)
         except StopIteration:
@@ -83,11 +84,10 @@ def select_command(
                 return selector.value
             case const.ACTION_ABORT:
                 logs.failed('\nAborted')
-                return
+                return None
             case const.ACTION_PREVIOUS:
                 selector.previous()
                 logs.confirm_text(selector.value)
             case const.ACTION_NEXT:
                 selector.next()
                 logs.confirm_text(selector.value)
-    return None

@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 
 from fuckoff import shells
-from fuckoff import conf, const
+from fuckoff import conf
 
 shells.shell = shells.Generic()
 
@@ -26,14 +26,11 @@ def no_memoize(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def settings(request):
-    def _reset_settings():
-        conf.settings.clear()
-        conf.settings.update(const.DEFAULT_SETTINGS)
-
-    request.addfinalizer(_reset_settings)
-    conf.settings.user_dir = Path('~/.fuckoff')
-    return conf.settings
+def settings():
+    yield conf.settings
+    conf.settings = conf.Settings(
+        user_dir=Path('~/.fuckoff')
+    )
 
 
 @pytest.fixture

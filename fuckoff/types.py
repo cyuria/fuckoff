@@ -9,7 +9,7 @@ from warnings import warn
 
 from . import logs
 from . import shells
-from .conf import settings, load_source
+from . import conf
 from .const import DEFAULT_PRIORITY, ALL_ENABLED
 from .utils import get_alias, format_raw_script
 from .output_readers import get_output
@@ -129,12 +129,12 @@ class Rule(object):
     def from_path(cls, path: Path) -> Optional[Rule]:
         """Creates rule instance from path."""
         name = path.name[:-3]
-        if name in settings.exclude_rules:
+        if name in conf.settings.exclude_rules:
             logs.debug(u'Ignoring excluded rule: {}'.format(name))
             return None
         with logs.debug_time(u'Importing rule: {};'.format(name)):
             try:
-                rule_module = load_source(name, str(path))
+                rule_module = conf.load_source(name, str(path))
             except Exception:
                 logs.exception(u"Rule {} failed to load".format(name), sys.exc_info())
                 return None
@@ -145,18 +145,18 @@ class Rule(object):
             rule_module.get_new_command,
             getattr(rule_module, 'enabled_by_default', True),
             getattr(rule_module, 'side_effect', None),
-            settings.priority.get(name, priority),
+            conf.settings.priority.get(name, priority),
             getattr(rule_module, 'requires_output', True)
         )
 
     @property
     def is_enabled(self) -> bool:
         """Returns `True` when rule enabled."""
-        return (
-            self.name in settings.rules
-            or self.enabled_by_default
-            and ALL_ENABLED in settings.rules
-        )
+        print(self)
+        print(conf.settings.rules)
+        if self.enabled_by_default and ALL_ENABLED in conf.settings.rules:
+            return True
+        return self.name in conf.settings.rules
 
     def is_match(self, command: Command) -> bool:
         """Returns `True` if rule matches the command."""
@@ -220,10 +220,10 @@ class CorrectedCommand(object):
         of running fuck in case fixed command fails again.
 
         """
-        if settings.repeat:
+        if conf.settings.repeat:
             repeat_fuck = '{} --repeat {}--force-command {}'.format(
                 get_alias(),
-                '--debug ' if settings.debug else '',
+                '--debug ' if conf.settings.debug else '',
                 shells.shell.quote(self.script))
             return shells.shell.or_(self.script, repeat_fuck)
         else:
@@ -233,7 +233,7 @@ class CorrectedCommand(object):
         """Runs command from rule for passed command."""
         if self.side_effect:
             self.side_effect(old_cmd, self.script)
-        if settings.alter_history:
+        if conf.settings.alter_history:
             shells.shell.put_to_history(self.script)
 
         sys.stdout.write(self._get_script())

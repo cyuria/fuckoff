@@ -22,7 +22,7 @@ def glob(mocker):
 class TestGetRules(object):
     @pytest.fixture(autouse=True)
     def load_source(self, monkeypatch):
-        monkeypatch.setattr('fuckoff.types.load_source',
+        monkeypatch.setattr('fuckoff.conf.load_source',
                             lambda x, _: Rule(x))
 
     def _compare_names(self, rules, names):
@@ -44,7 +44,7 @@ class TestGetRules(object):
 
 
 def test_get_rules_rule_exception(mocker, glob):
-    load_source = mocker.patch('fuckoff.types.load_source',
+    load_source = mocker.patch('fuckoff.conf.load_source',
                                side_effect=ImportError("No module named foo..."))
     glob([Path('git.py')])
     assert not corrector.get_rules()

@@ -12,6 +12,8 @@ def match(command):
 
 
 def get_new_command(command):
-    mistake = re.search(INVALID_CHOICE, command.output).group(0)
+    mistake = re.search(INVALID_CHOICE, command.output)
+    if mistake is None:
+        raise Exception('Rule incorrectly matched')
     options = re.findall(OPTIONS, command.output, flags=re.MULTILINE)
-    return [replace_argument(command.script, mistake, o) for o in options]
+    return [replace_argument(command.script, mistake.group(0), o) for o in options]

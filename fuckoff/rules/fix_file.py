@@ -1,13 +1,21 @@
 import re
 import os
+from typing import Pattern
 
-from fuckoff.conf import settings
 from fuckoff.shells import shell
-from fuckoff.utils import memoize, default_settings
+from fuckoff.utils import memoize
+
+
+# for the sake of readability do not use named groups above
+def _make_pattern(pattern: str) -> Pattern[str]:
+    pattern = pattern.replace('{file}', '(?P<file>[^:\n]+)') \
+                     .replace('{line}', '(?P<line>[0-9]+)') \
+                     .replace('{col}', '(?P<col>[0-9]+)')
+    return re.compile(pattern, re.MULTILINE)
 
 
 # order is important: only the first match is considered
-patterns = (
+patterns: list[Pattern[str]] = [_make_pattern(p) for p in (
     # js, node:
     '^    at {file}:{line}:{col}',
     # cargo:
@@ -32,24 +40,13 @@ patterns = (
     '^{file}:{line}:',
     # perl:
     'at {file} line {line}',
-)
-
-
-# for the sake of readability do not use named groups above
-def _make_pattern(pattern):
-    pattern = pattern.replace('{file}', '(?P<file>[^:\n]+)') \
-                     .replace('{line}', '(?P<line>[0-9]+)') \
-                     .replace('{col}', '(?P<col>[0-9]+)')
-    return re.compile(pattern, re.MULTILINE)
-
-
-patterns = [_make_pattern(p).search for p in patterns]
+)]
 
 
 @memoize
 def _search(output):
     for pattern in patterns:
-        m = pattern(output)
+        m = pattern.search(output)
         if m and os.path.isfile(m.group('file')):
             return m
 
@@ -58,24 +55,19 @@ def match(command):
     if 'EDITOR' not in os.environ:
         return False
 
-    return _search(command.output)
+    return _search(command.output) is not None
 
 
-@default_settings({'fixlinecmd': u'{editor} {file} +{line}',
-                   'fixcolcmd': None})
 def get_new_command(command):
     m = _search(command.output)
+    if m is None:
+        raise Exception('Rule incorrectly matched')
 
     # Note: there does not seem to be a standard for columns, so they are just
-    # ignored by default
-    if settings.fixcolcmd and 'col' in m.groupdict():
-        editor_call = settings.fixcolcmd.format(editor=os.environ['EDITOR'],
-                                                file=m.group('file'),
-                                                line=m.group('line'),
-                                                col=m.group('col'))
-    else:
-        editor_call = settings.fixlinecmd.format(editor=os.environ['EDITOR'],
-                                                 file=m.group('file'),
-                                                 line=m.group('line'))
-
-    return shell.and_(editor_call, command.script)
+    # ignored. If you would like to add columns, make your own rule
+    return [
+        shell.and_(
+            f"{os.environ['EDITOR']} {m.group('file')} +{m.group('line')}",
+            command.script
+        )
+    ]

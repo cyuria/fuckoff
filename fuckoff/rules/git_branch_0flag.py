@@ -4,7 +4,7 @@ from fuckoff.utils import memoize
 
 
 @memoize
-def first_0flag(script_parts):
+def first_0flag(script_parts: list[str]):
     return next((p for p in script_parts if len(p) == 2 and p.startswith("0")), None)
 
 
@@ -16,6 +16,8 @@ def match(command):
 @git_support
 def get_new_command(command):
     branch_name = first_0flag(command.script_parts)
+    if branch_name is None:
+        raise Exception('Rule incorrectly matched')
     fixed_flag = branch_name.replace("0", "-")
     fixed_script = command.script.replace(branch_name, fixed_flag)
     if "A branch named '" in command.output and "' already exists." in command.output:
